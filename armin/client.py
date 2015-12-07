@@ -3,7 +3,7 @@
 
 import logging
 import paramiko
-from host import Host
+from armin.host import Host
 
 logger = logging.getLogger(__name__)
 
