@@ -1,0 +1,11 @@
+group1:
+    servers:
+        - 10.10.11.59
+        - 10.10.11.58
+    auth:
+        user: root
+        password: 123
+        keyfile: xxx_rsa
+    methods:
+        - init
+
