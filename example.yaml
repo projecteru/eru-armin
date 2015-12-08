@@ -24,27 +24,43 @@ test:
       - ricebook.repo
     rm_repo:
       - a.repo
-    update_system: ''
+    update_system:
+      quite: False
     add_user:
       cmgs:
         uid: 3001
-        key_file: xx
         sudo: True
         login: True
+        pkey: cmgs.pub
       tonic:
         uid: 3002
-        key_file: xx
-        sudo: True
+        sudo: False
         login: True
+        pkey: tonic.pub
+      logstash:
+        uid: 3003
+        sudo: False
+        login: False
+      test:
+        uid: 3004
+        sudo: False
+        login: True
+        pkey: cmgs.pub
     rm_user:
+      - tonic
+    rm_sudo:
+      - cmgs
+    add_sudo:
       - test
     security_root:
-      - random_password
-      - forbiden_login
+      random_password: False
+      security_login:
+        - 10.10.*.*
+      root_key: True
     optimize:
       ulimit: True
       sysctl: True
-    install_services:
+    services:
       docker:
         enable: True
       eru-agent:

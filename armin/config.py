@@ -30,3 +30,8 @@ PASSWORD_LENGTH = 8
 
 ARMIN_PUB_KEY = '/Users/CMGS/Documents/Workplace/work/armin2/root/root.pub'
 
+LOCAL_ULIMIT_CONF = '/Users/CMGS/Documents/Workplace/work/armin2/optimize/limits.conf'
+REMOTE_ULIMIT_CONF = '/etc/security/limits.conf'
+
+LOCAL_SYSCTL_FILE = '/Users/CMGS/Documents/Workplace/work/armin2/optimize/sysctl.py'
+

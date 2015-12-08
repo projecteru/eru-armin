@@ -1,3 +1,4 @@
 *.pyc
 test.yaml
 local_config.py
+*.egg-info

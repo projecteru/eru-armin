@@ -69,11 +69,11 @@ class Host(object):
             sftp.put(src, dst)
         except Exception, e:
             logger.error(e)
+            return False
         else:
             logger.info('upload %s to %s success', src, dst)
         finally:
             sftp.close()
-            return False
         return True
 
     def set_hostname(self, hostname):
@@ -268,6 +268,22 @@ class Host(object):
                 logger.info(err)
             else:
                 result['root_key'] = True
+
+        return result
+
+    def optimize(self, ulimit=False, sysctl=False):
+        result = {}
+
+        if sysctl and self._upload(config.LOCAL_SYSCTL_FILE, '/tmp/init.py'):
+            cmd = 'python /tmp/init.py && rm -rf /tmp/init.py'
+            code, err = self._execute(cmd)
+            if code != config.EXECUTE_OK:
+                logger.info(err)
+            else:
+                result['sysctl'] = True
+
+        if ulimit:
+            result['ulimit'] = self._upload(config.LOCAL_ULIMIT_CONF, config.REMOTE_ULIMIT_CONF)
 
         return result
 
