@@ -1,2 +1,3 @@
 *.pyc
-test.*
+test.yaml
+local_config.py

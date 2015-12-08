@@ -1,11 +1,56 @@
-group1:
-    servers:
-        - 10.10.11.59
-        - 10.10.11.58
-    auth:
-        user: root
-        password: 123
-        keyfile: xxx_rsa
-    methods:
-        - init
+test:
+  servers:
+    - 10.10.118.94
+  auth:
+    user: root
+    password: ricebook!^*cobbler
+  methods:
+    set_hostname:
+      hostname: zzz
+      incr: True
+    set_gateway_and_dns:
+      interface: eth0
+      gateway: 10.10.196.88
+      dns:
+        - 10.10.99.43
+      domain: ricebook.net
+    set_hosts:
+      mfsmaster: 10.10.57.167
+    rm_hosts:
+      - hub.nova.ricebook.net
+    add_repo:
+      - MooseFS.repo
+      - docker.repo
+      - ricebook.repo
+    rm_repo:
+      - a.repo
+    update_system: ''
+    add_user:
+      cmgs:
+        uid: 3001
+        key_file: xx
+        sudo: True
+        login: True
+      tonic:
+        uid: 3002
+        key_file: xx
+        sudo: True
+        login: True
+    rm_user:
+      - test
+    security_root:
+      - random_password
+      - forbiden_login
+    optimize:
+      ulimit: True
+      sysctl: True
+    install_services:
+      docker:
+        enable: True
+      eru-agent:
+        enable: True
+      moosefs-client:
+        enable: True
+      falcon-agent:
+        enable: True
 

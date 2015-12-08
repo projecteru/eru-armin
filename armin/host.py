@@ -4,18 +4,9 @@
 import os
 import select
 import logging
+from armin import config
 
 logger = logging.getLogger(__name__)
-
-INTERFACE_CONFIG = '/etc/sysconfig/network-scripts/ifcfg-%s'
-GATEWAY_CONFIG = 'GATEWAY=%s'
-
-RESOLV_CONF = '/etc/resolv.conf'
-HOSTS_CONF = '/etc/hosts'
-REPO_DIR = '/etc/yum.repos.d/'
-
-EXECUTE_EXCEPTION_CODE = -1
-EXECUTE_OK = 0
 
 class Host(object):
 
@@ -38,7 +29,7 @@ class Host(object):
                     print chan.recv(1024),
         except Exception, e:
             logger.error(e)
-            return EXECUTE_EXCEPTION_CODE, str(e)
+            return config.EXECUTE_EXCEPTION_CODE, str(e)
 
         exit_status = chan.recv_exit_status()
         logger.info('%s exit code %d' % (cmd, exit_status))
@@ -69,12 +60,12 @@ class Host(object):
         logger.info('set hostname')
         cmd = 'hostnamectl set-hostname %s --static' % hostname
         code, err = self._execute(cmd)
-        if code != EXECUTE_OK:
+        if code != config.EXECUTE_OK:
             logger.info(err)
             return False
         cmd = 'hostname %s' % hostname
         code, err = self._execute(cmd)
-        if code != EXECUTE_OK:
+        if code != config.EXECUTE_OK:
             logger.info(err)
             return False
         return True
@@ -82,15 +73,15 @@ class Host(object):
     def set_hosts(self, **kwargs):
         logger.info('set hosts')
         old = '-'.join(self.server.split('.'))
-        cmd = '''sed -i 's/%s/'"$HOSTNAME"'/g' %s''' % (old, HOSTS_CONF)
+        cmd = '''sed -i 's/%s/'"$HOSTNAME"'/g' %s''' % (old, config.HOSTS_CONF)
         code, err = self._execute(cmd)
-        if code != EXECUTE_OK:
+        if code != config.EXECUTE_OK:
             logger.info(err)
             return False
         new = '\n'.join(['%s %s' % (name, server) for name, server in kwargs.iteritems()])
-        cmd = '''sed -i '$ a %s' %s''' % (new, HOSTS_CONF)
+        cmd = '''sed -i '$ a %s' %s''' % (new, config.HOSTS_CONF)
         code, err = self._execute(cmd)
-        if code != EXECUTE_OK:
+        if code != config.EXECUTE_OK:
             logger.info(err)
             return False
         return True
@@ -98,18 +89,20 @@ class Host(object):
     def rm_hosts(self, *args):
         logger.info('delete host')
         s = ';'.join(['/%s$/d' % name for name in args])
-        cmd = '''sed -i '%s' %s''' % (s, HOSTS_CONF)
+        cmd = '''sed -i '%s' %s''' % (s, config.HOSTS_CONF)
         code, err = self._execute(cmd)
-        if code != EXECUTE_OK:
+        if code != config.EXECUTE_OK:
             logger.info(err)
             return False
         return True
 
-    def update_system(self):
+    def update_system(self, quite=False):
         logger.info('update system')
         cmd = 'yum update -y'
+        if quite:
+            cmd = 'yum update -y -q'
         code, err = self._execute(cmd)
-        if code != EXECUTE_OK:
+        if code != config.EXECUTE_OK:
             logger.info(err)
             return False
         return True
@@ -119,45 +112,51 @@ class Host(object):
         s = ['nameserver %s' % ip for ip in dns]
         if domain:
             s.append('domain %s' % domain)
-        cmd = '''echo -e '%s' > %s''' % ('\n'.join(s), RESOLV_CONF)
-        config_file = INTERFACE_CONFIG % interface
-        gateway = GATEWAY_CONFIG % gateway
+        cmd = '''echo -e '%s' > %s''' % ('\n'.join(s), config.RESOLV_CONF)
+        config_file = config.INTERFACE_CONFIG % interface
+        gateway = config.GATEWAY_CONFIG % gateway
         code, err = self._execute(cmd)
-        if code != EXECUTE_OK:
+        if code != config.EXECUTE_OK:
             logger.info(err)
             return False
         # clean ifcfg resolver and getway config
         # set new gateway
         cmd = '''sed -i '/DNS/d;/DOMAIN/d;/GATEWAY/d;/NETMASK/a %s' %s''' % (gateway, config_file)
         code, err = self._execute(cmd)
-        if code != EXECUTE_OK:
+        if code != config.EXECUTE_OK:
             logger.info(err)
             return False
-        cmd = 'service network restart'
+        cmd = 'systemctl restart network -q'
         code, err = self._execute(cmd)
-        if code != EXECUTE_OK:
+        if code != config.EXECUTE_OK:
             logger.info(err)
             return False
         return True
 
-    def add_repo(self, prefix, *args):
+    def add_repo(self, *args):
         result = {}
         for repo in args:
-            src = os.path.join(prefix, repo)
-            dst = os.path.join(REPO_DIR, repo)
+            src = os.path.join(config.LOCAL_REPO_DIR, repo)
+            dst = os.path.join(config.REMOTE_REPO_DIR, repo)
             result[repo] = self._upload(src, dst)
         return result
 
     def rm_repo(self, *args):
         result = {}
         for repo in args:
-            target = os.path.join(REPO_DIR, repo)
+            target = os.path.join(config.REMOTE_REPO_DIR, repo)
             cmd = 'rm -rf %s' % target
             code, err = self._execute(cmd)
-            if code != EXECUTE_OK:
+            if code != config.EXECUTE_OK:
                 logger.info(err)
                 result[repo] = False
             else:
                 result[repo] = True
         return result
+
+    def add_user(self, **kwargs):
+        pass
+
+    def rm_user(self, *args):
+        pass
 
