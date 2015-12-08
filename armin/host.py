@@ -43,7 +43,7 @@ class Host(object):
         try:
             chan.exec_command(cmd)
             while True:
-                if chan.exit_status_ready():
+                if chan.exit_status_ready() or chan.closed:
                     break
                 rl, wl, xl = select.select([chan], [], [], 1)
                 if chan in rl and chan.recv_stderr_ready():
