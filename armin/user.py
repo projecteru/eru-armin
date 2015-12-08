@@ -30,7 +30,9 @@ class User(object):
         return utils.get_random_passwd(length)
 
     def get_home(self):
-        return os.path.join(config.REMOTE_HOME_DIR, self.username)
+        if self.login:
+            return os.path.join(config.REMOTE_HOME_DIR, self.username)
+        return os.path.join(config.REMOTE_NOLOGIN_HOME_DIR, self.username)
 
     def get_ssh_path(self):
         return os.path.join(self.get_home(), config.REMOTE_SSH_DIR)

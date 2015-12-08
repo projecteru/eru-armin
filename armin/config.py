@@ -16,11 +16,14 @@ REMOTE_REPO_DIR = '/etc/yum.repos.d/'
 USERADD_BIN = 'adduser'
 PKEY_DIR = '/Users/CMGS/Documents/Workplace/work/armin2/keys/'
 REMOTE_HOME_DIR = '/home'
+REMOTE_NOLOGIN_HOME_DIR = '/var/lib'
 
 REMOTE_SSH_DIR = '.ssh'
 REMOTE_AUTHORIZED_KEYS = 'authorized_keys'
 
 LOGIN_SHELL = '/bin/bash'
 NOLOGIN = '/sbin/nologin'
+
+SSHD_CONFIG = '/etc/ssh/sshd_config'
 
 PASSWORD_LENGTH = 8

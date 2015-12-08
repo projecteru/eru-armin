@@ -28,14 +28,14 @@ if __name__ == '__main__':
                     hostname = '%s%d' % (hostname, count)
                     count += 1
                 print '*'*20
-                func(hostname)
+                print func(hostname)
                 print '*'*20
-            if method in ['set_gateway_and_dns', 'set_hosts', 'add_user', 'update_system']:
+            if method in ['set_gateway_and_dns', 'set_hosts', 'add_user', 'update_system', 'security_root']:
                 print '*'*20
                 print func(**params)
                 print '*'*20
-            if method in ['rm_hosts', 'rm_repo', 'add_repo']:
+            if method in ['rm_hosts', 'rm_repo', 'add_repo', 'rm_user', 'rm_sudo', 'add_sudo']:
                 print '*'*20
-                func(*params)
+                print func(*params)
                 print '*'*20
 

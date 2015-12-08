@@ -6,6 +6,7 @@ import select
 import logging
 from armin import config
 from armin.user import User
+from armin.utils import get_random_passwd
 
 logger = logging.getLogger(__name__)
 
@@ -14,6 +15,24 @@ class Host(object):
     def __init__(self, server, client):
         self.client = client
         self.server = server
+
+    def _add_sudo(self, username):
+        cmd = '''gpasswd -a %s wheel''' % username
+        code, err = self._execute(cmd)
+        if code != config.EXECUTE_OK:
+            logger.info(err)
+            return False
+        return True
+
+    def _set_password(self, username, password):
+        cmd = '''echo -e '{password}\n{password}\n' | passwd {username} --stdin'''.format(
+            password = password, username = username,
+        )
+        code, err = self._execute(cmd)
+        if code != config.EXECUTE_OK:
+            logger.info(err)
+            return False
+        return True
 
     def _execute(self, cmd):
         logger.debug(cmd)
@@ -145,14 +164,13 @@ class Host(object):
     def rm_repo(self, *args):
         result = {}
         for repo in args:
+            result[repo] = True
             target = os.path.join(config.REMOTE_REPO_DIR, repo)
             cmd = 'rm -rf %s' % target
             code, err = self._execute(cmd)
             if code != config.EXECUTE_OK:
                 logger.info(err)
                 result[repo] = False
-            else:
-                result[repo] = True
         return result
 
     def add_user(self, **kwargs):
@@ -173,12 +191,7 @@ class Host(object):
                 continue
             result[username]['add'] = True
             password = user.get_password(config.PASSWORD_LENGTH)
-            cmd = '''echo -e '{password}\n{password}\n' | passwd {username} --stdin'''.format(
-                password = password, username = username,
-            )
-            code, err = self._execute(cmd)
-            if code != config.EXECUTE_OK:
-                logger.info(err)
+            if not self._set_password(username, password):
                 continue
             result[username]['password'] = password
             if user.login and user.get_key():
@@ -198,12 +211,45 @@ class Host(object):
         return result
 
     def rm_user(self, *args):
-        pass
+        result = {}
+        for username in args:
+            result[username] = True
+            cmd = '''userdel -r -f %s''' % username
+            code, err = self._execute(cmd)
+            if code != config.EXECUTE_OK:
+                logger.info(err)
+                result[username] = False
+        return result
 
-    def _add_sudo(self, username):
-        cmd = '''gpasswd -a %s wheel''' % username
-        code, err = self._execute(cmd)
-        if code != config.EXECUTE_OK:
-            return False
-        return True
+    def rm_sudo(self, *args):
+        result = {}
+        for username in args:
+            result[username] = True
+            cmd = '''gpasswd -d %s wheel''' % username
+            code, err = self._execute(cmd)
+            if code != config.EXECUTE_OK:
+                logger.info(err)
+                result[username] = False
+        return result
+
+    def add_sudo(self, *args):
+        result = {}
+        for username in args:
+            result[username] = self._add_sudo(username)
+        return result
+
+    def security_root(self, random_password=False, forbiden_login=False):
+        result = {'random_password': False, 'forbiden_login': False}
+        password = get_random_passwd(config.PASSWORD_LENGTH)
+        if random_password and self._set_password('root', password):
+            result['random_password'] = True
+        if forbiden_login:
+            #TODO replace not add
+            cmd = '''sed -i '$a PermitRootLogin no' %s && service sshd restart''' % config.SSHD_CONFIG
+            code, err = self._execute(cmd)
+            if code != config.EXECUTE_OK:
+                logger.info(err)
+            else:
+                result['forbiden_login'] = True
+        return result
 
