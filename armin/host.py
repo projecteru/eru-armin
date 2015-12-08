@@ -99,7 +99,7 @@ class Host(object):
         if code != config.EXECUTE_OK:
             logger.info(err)
             return False
-        new = '\n'.join(['%s %s' % (name, server) for name, server in kwargs.iteritems()])
+        new = '\n'.join(['%s %s' % (server, name) for name, server in kwargs.iteritems()])
         cmd = '''sed -i '$ a %s' %s''' % (new, config.HOSTS_CONF)
         code, err = self._execute(cmd)
         if code != config.EXECUTE_OK:
