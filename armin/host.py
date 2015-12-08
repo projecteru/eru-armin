@@ -38,28 +38,28 @@ class Host(object):
     def _execute(self, cmd):
         logger.debug(cmd)
         chan = self.client.get_transport().open_session()
-        chan.settimeout(10800)
+        chan.setblocking(0)
+        err = ''
         try:
             chan.exec_command(cmd)
             while True:
                 if chan.exit_status_ready():
                     break
-                rl, wl, xl = select.select([chan], [], [], 0.1)
-                if len(rl) > 0:
+                rl, wl, xl = select.select([chan], [], [], 1)
+                if chan in rl and chan.recv_stderr_ready():
                     #TODO be nice
+                    data = chan.recv_stderr(1024)
+                    err += data
+                    print data,
+                elif chan in rl and chan.recv_ready():
                     print chan.recv(1024),
         except Exception, e:
-            logger.error(e)
+            logger.exception(e)
             return config.EXECUTE_EXCEPTION_CODE, str(e)
 
         exit_status = chan.recv_exit_status()
         logger.info('%s exit code %d' % (cmd, exit_status))
         if exit_status != 0:
-            data = chan.recv_stderr(1024)
-            err = ''
-            while data:
-                err += data
-                data = chan.recv_stderr(1024)
             return exit_status, err
         else:
             return exit_status, ''
@@ -69,7 +69,7 @@ class Host(object):
         try:
             sftp.put(src, dst)
         except Exception, e:
-            logger.error(e)
+            logger.exception(e)
             return False
         else:
             logger.info('upload %s to %s success', src, dst)

@@ -25,7 +25,7 @@ def generate_ssh_clients(config):
                 look_for_keys = False,
             )
         except Exception, e:
-            logger.error(e)
+            logger.exception(e)
         else:
             clients[server] = Host(server, client)
     return clients
