@@ -27,9 +27,15 @@ if __name__ == '__main__':
                 if params.get('incr', False):
                     hostname = '%s%d' % (hostname, count)
                     count += 1
+                print '*'*20
                 func(hostname)
-            if method in ['set_gateway_and_dns', 'set_hosts', 'update_system']:
-                func(**params)
+                print '*'*20
+            if method in ['set_gateway_and_dns', 'set_hosts', 'add_user', 'update_system']:
+                print '*'*20
+                print func(**params)
+                print '*'*20
             if method in ['rm_hosts', 'rm_repo', 'add_repo']:
+                print '*'*20
                 func(*params)
+                print '*'*20
 

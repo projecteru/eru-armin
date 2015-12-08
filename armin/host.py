@@ -5,6 +5,7 @@ import os
 import select
 import logging
 from armin import config
+from armin.user import User
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +24,7 @@ class Host(object):
             while True:
                 if chan.exit_status_ready():
                     break
-                rl, wl, xl = select.select([chan], [], [], 0.0)
+                rl, wl, xl = select.select([chan], [], [], 0.1)
                 if len(rl) > 0:
                     #TODO be nice
                     print chan.recv(1024),
@@ -155,8 +156,54 @@ class Host(object):
         return result
 
     def add_user(self, **kwargs):
-        pass
+        result = {}
+        for username, params in kwargs.iteritems():
+            result[username] = {'add': False}
+            user = User(username=username, **params)
+            cmd = '''%s -d %s -m -u %d -U -s %s %s''' % (
+                config.USERADD_BIN,
+                user.get_home(),
+                user.uid,
+                user.get_shell(),
+                user.username,
+            )
+            code, err = self._execute(cmd)
+            if code != config.EXECUTE_OK:
+                logger.info(err)
+                continue
+            result[username]['add'] = True
+            password = user.get_password(config.PASSWORD_LENGTH)
+            cmd = '''echo -e '{password}\n{password}\n' | passwd {username} --stdin'''.format(
+                password = password, username = username,
+            )
+            code, err = self._execute(cmd)
+            if code != config.EXECUTE_OK:
+                logger.info(err)
+                continue
+            result[username]['password'] = password
+            if user.login and user.get_key():
+                cmd = '''mkdir -p {ssh_path} && echo {content} > {authorized_keys} && chown -R {username}:{username} {ssh_path} && chmod 600 {authorized_keys}'''.format(
+                    ssh_path = user.get_ssh_path(),
+                    authorized_keys = user.get_authorized_keys_path(),
+                    username = username,
+                    content = user.get_key(),
+                )
+                code, err = self._execute(cmd)
+                if code != config.EXECUTE_OK:
+                    logger.info(err)
+                    continue
+                result[username]['key_auth'] = True
+            if user.sudo:
+                result[username]['sudo'] = self._add_sudo(username)
+        return result
 
     def rm_user(self, *args):
         pass
+
+    def _add_sudo(self, username):
+        cmd = '''gpasswd -a %s wheel''' % username
+        code, err = self._execute(cmd)
+        if code != config.EXECUTE_OK:
+            return False
+        return True
 
