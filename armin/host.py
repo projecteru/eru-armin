@@ -6,6 +6,7 @@ import select
 import logging
 from armin import config
 from armin.user import User, Root
+from armin.service import Service
 from armin.utils import get_random_passwd
 
 logger = logging.getLogger(__name__)
@@ -284,6 +285,35 @@ class Host(object):
 
         if ulimit:
             result['ulimit'] = self._upload(config.LOCAL_ULIMIT_CONF, config.REMOTE_ULIMIT_CONF)
+
+        return result
+
+    def services(self, install=None, modify=None, restart=None):
+        svrs = Service(self)
+        result = {}
+        if install:
+            r = {}
+            for service, params in install.iteritems():
+                r[service] = False
+                name = service.replace('-', '_')
+                func = getattr(svrs, 'install_%s' % name, None)
+                if func:
+                    r[service] = func(**params)
+            result['install'] = r
+
+        if modify:
+            r = {}
+            for service, params in modify.iteritems():
+                r[service] = False
+                name = service.replace('-', '_')
+                func = getattr(svrs, 'modify_%s' % name, None)
+                if func:
+                    r[service] = func(**params)
+            result['modify'] = r
+
+        if restart:
+            r = svrs.restart(restart)
+            result['restart'] = r
 
         return result
 

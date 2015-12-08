@@ -61,12 +61,18 @@ test:
       ulimit: True
       sysctl: True
     services:
-      docker:
-        enable: True
-      eru-agent:
-        enable: True
-      moosefs-client:
-        enable: True
-      falcon-agent:
-        enable: True
+      install:
+        moosefs-client:
+          enable: True
+          mount: /tmp/mfs1
+          mfsmaster: 10.10.57.167
+          port: 9421
+      modify:
+        moosefs-client:
+          update: True
+          mount: /mnt/mfs
+          mfsmaster: mfsmaster
+          port: 9421
+      restart:
+        - moosefs-client
 

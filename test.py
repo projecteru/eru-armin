@@ -21,6 +21,8 @@ if __name__ == '__main__':
             if not func:
                 logger.info('method %s not allowed', method)
                 continue
+            #if method == 'services':
+            #    print func(**params)
             if method == 'set_hostname':
                 hostname = params.get('hostname')
                 #TODO check
@@ -30,7 +32,7 @@ if __name__ == '__main__':
                 print '*'*20
                 print func(hostname)
                 print '*'*20
-            if method in ['optimize', 'set_gateway_and_dns', 'set_hosts', 'add_user', 'update_system', 'security_root']:
+            if method in ['services', 'optimize', 'set_gateway_and_dns', 'set_hosts', 'add_user', 'update_system', 'security_root']:
                 print '*'*20
                 print func(**params)
                 print '*'*20
