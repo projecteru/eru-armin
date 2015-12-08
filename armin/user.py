@@ -40,3 +40,19 @@ class User(object):
     def get_authorized_keys_path(self):
         return os.path.join(self.get_ssh_path(), config.REMOTE_AUTHORIZED_KEYS)
 
+class Root(object):
+
+    @classmethod
+    def get_key(cls):
+        with open(config.ARMIN_PUB_KEY) as f:
+            content = f.readline()
+        return content.strip()
+
+    @classmethod
+    def get_ssh_path(cls):
+        return '/root/.ssh'
+
+    @classmethod
+    def get_authorized_keys_path(cls):
+        return '/root/.ssh/authorized_keys'
+

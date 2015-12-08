@@ -27,3 +27,6 @@ NOLOGIN = '/sbin/nologin'
 SSHD_CONFIG = '/etc/ssh/sshd_config'
 
 PASSWORD_LENGTH = 8
+
+ARMIN_PUB_KEY = '/Users/CMGS/Documents/Workplace/work/armin2/root/root.pub'
+

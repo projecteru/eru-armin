@@ -5,7 +5,7 @@ import os
 import select
 import logging
 from armin import config
-from armin.user import User
+from armin.user import User, Root
 from armin.utils import get_random_passwd
 
 logger = logging.getLogger(__name__)
@@ -238,18 +238,36 @@ class Host(object):
             result[username] = self._add_sudo(username)
         return result
 
-    def security_root(self, random_password=False, forbiden_login=False):
-        result = {'random_password': False, 'forbiden_login': False}
+    def security_root(self, random_password=False, root_key=False, security_login=None):
+        result = {'random_password': False, 'root_key': False, 'security_login': False}
+
         password = get_random_passwd(config.PASSWORD_LENGTH)
         if random_password and self._set_password('root', password):
             result['random_password'] = True
-        if forbiden_login:
-            #TODO replace not add
-            cmd = '''sed -i '$a PermitRootLogin no' %s && service sshd restart''' % config.SSHD_CONFIG
+
+        if security_login:
+            cmd = '''sed -i 's/#PermitEmptyPasswords/PermitEmptyPasswords/g;s/#PermitRootLogin yes/PermitRootLogin no/g' {config}'''.format(config=config.SSHD_CONFIG)
+            cmd += ''' && sed -i '/Match/d;$d' {config}'''.format(config=config.SSHD_CONFIG)
+            cmd += ''' && sed -i '$a Match Address {addr}\\n   PermitRootLogin yes' {config}'''.format(addr=','.join(security_login), config=config.SSHD_CONFIG)
+            cmd += ''' && service sshd restart'''
             code, err = self._execute(cmd)
             if code != config.EXECUTE_OK:
                 logger.info(err)
             else:
-                result['forbiden_login'] = True
+                result['security_login'] = True
+
+        if root_key:
+            cmd = '''mkdir -p {root_ssh_path}'''.format(root_ssh_path=Root.get_ssh_path())
+            cmd += ''' && echo {content} > {root_authorized_keys}'''.format(
+                    content=Root.get_key(),
+                    root_authorized_keys=Root.get_authorized_keys_path()
+            )
+            cmd += ''' && chmod 600 {root_authorized_keys}'''.format(root_authorized_keys=Root.get_authorized_keys_path())
+            code, err = self._execute(cmd)
+            if code != config.EXECUTE_OK:
+                logger.info(err)
+            else:
+                result['root_key'] = True
+
         return result
 
