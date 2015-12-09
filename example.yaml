@@ -15,7 +15,7 @@ test:
         - 10.10.99.43
       domain: ricebook.net
     set_hosts:
-      mfsmaster: 10.10.57.167
+      10.10.57.167: mfsmaster
     rm_hosts:
       - hub.nova.ricebook.net
     add_repo:
@@ -64,15 +64,32 @@ test:
       install:
         moosefs-client:
           enable: True
-          mount: /tmp/mfs1
-          mfsmaster: 10.10.57.167
-          port: 9421
+          config:
+            mount: /tmp/mfs1
+            mfsmaster: 10.10.57.167
+            port: 9421
+        falcon-agent:
+          enable: True
+          config:
+            hbs: 10.10.181.150:6030
+            transfer: 10.10.194.26:8433
+        docker:
+          enable: True
+          config:
+            pod: dev
+            eru: eru.nova.ricebook.net
       modify:
         moosefs-client:
           update: True
-          mount: /mnt/mfs
-          mfsmaster: mfsmaster
-          port: 9421
+          config:
+            mount: /mnt/mfs
+            mfsmaster: mfsmaster
+            port: 9421
+        falcon-agent:
+          update: True
+          config:
+            hbs: 10.10.181.150:6030
+            transfer: 10.10.194.26:8433
       restart:
         - moosefs-client
 

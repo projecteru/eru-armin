@@ -4,6 +4,7 @@
 import logging
 from armin import config
 
+from armin.services import docker
 from armin.services import mfsmount
 from armin.services import falcon_agent
 
@@ -71,5 +72,23 @@ class Service(object):
         cmd = 'yum install falcon-agent -y && systemctl start falcon-agent'
         if enable:
             cmd += ' && systemctl enable falcon-agent'
+        return self.host._execute(cmd)
+
+    def install_docker(self, config, enable=False):
+        config['ip'] = self.host.server
+        svr = docker.Docker(config)
+        if not svr:
+            return False
+        if not svr.prepare(self.host._upload):
+            return False
+        cmd = 'cd /tmp && python /tmp/dockersetup.py && rm -rf /tmp/dockersetup.py'
+        if not self.host._execute(cmd):
+            return False
+        if not svr.make_service(self.host._upload):
+            return False
+        cmd = 'systemctl daemon-reload && systemctl start docker'
+        cmd += ' && chmod +x /usr/bin/docker-enter && chmod +x /usr/bin/nsenter'
+        if enable:
+            cmd += ' && systemctl enable docker'
         return self.host._execute(cmd)
 
