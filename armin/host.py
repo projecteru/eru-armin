@@ -30,18 +30,24 @@ class Host(object):
     def _execute(self, cmd):
         #logger.debug(cmd)
         #TODO be nice
-        print '*'*40
         chan = self.client.get_transport().open_session()
         chan.setblocking(0)
         try:
             chan.exec_command(cmd)
             while True:
+                data = False
                 rl, wl, xl = select.select([chan], [], [], 1)
                 if chan in rl and chan.recv_stderr_ready():
-                    print chan.recv_stderr(1024)
+                    print chan.recv_stderr(1024),
+                    data = True
                 elif chan in rl and chan.recv_ready():
                     print chan.recv(1024),
-                if chan.exit_status_ready() or chan.closed:
+                    data = True
+                if not data \
+                    and (chan.exit_status_ready() or chan.closed) \
+                    and not chan.recv_stderr_ready() \
+                    and not chan.recv_ready():
+                    chan.shutdown(2)
                     break
         except Exception, e:
             logger.exception(e)

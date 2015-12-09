@@ -16,11 +16,14 @@ if __name__ == '__main__':
     count = 1
     for _, host in clients.iteritems():
         logger.info(host.server)
+        print host.server
         for method, params in test_config['methods'].iteritems():
             func = getattr(host, method, None)
             if not func:
                 logger.info('method %s not allowed', method)
                 continue
+            print '*'*40
+            print method
             #if method in ['set_gateway_and_dns']:
             #    print func(**params)
             if method == 'set_hostname':
