@@ -79,15 +79,12 @@ class Service(object):
         svr = docker.Docker(config)
         if not svr:
             return False
-        if not svr.prepare(self.host._upload):
-            return False
-        cmd = 'cd /tmp && python /tmp/dockersetup.py && rm -rf /tmp/dockersetup.py'
-        if not self.host._execute(cmd):
-            return False
         if not svr.make_service(self.host._upload):
             return False
-        cmd = 'systemctl daemon-reload && systemctl start docker'
-        cmd += ' && chmod +x /usr/bin/docker-enter && chmod +x /usr/bin/nsenter'
+        cmd = 'cd /tmp && python /tmp/dockersetup.py && rm -rf /tmp/dockersetup.py && rm -rf /tmp/certs'
+        if not self.host._execute(cmd):
+            return False
+        cmd = 'chmod +x /usr/bin/docker-enter && chmod +x /usr/bin/nsenter'
         if enable:
             cmd += ' && systemctl enable docker'
         return self.host._execute(cmd)

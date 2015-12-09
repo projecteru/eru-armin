@@ -2,10 +2,30 @@
 # coding: utf-8
 
 import os
+import time
 import errno
 import shutil
 import subprocess
 import tempfile
+
+SERVICE_UNIT = '''
+[Unit]
+Description=Docker Application Container Engine
+Documentation=https://docs.docker.com
+After=network.target docker.socket
+Requires=docker.socket
+
+[Service]
+Type=notify
+ExecStart=/usr/bin/docker daemon -H fd:// -H tcp://0.0.0.0:2376 --tlsverify --tlscacert=/etc/docker/tls/ca.pem --tlscert=/etc/docker/tls/server-cert.pem --tlskey=/etc/docker/tls/server-key.pem --insecure-registry hub.nova.ricebook.net
+MountFlags=slave
+LimitNOFILE=10485760
+LimitNPROC=10485760
+LimitCORE=infinity
+
+[Install]
+WantedBy=multi-user.target
+'''
 
 def call_command(cmd):
     return subprocess.call(cmd.split(' '))
@@ -24,18 +44,34 @@ def make_file(path, content):
 
 DOCKER_SERVER_TLS_PATH = '/etc/docker/tls'
 DOCKER_CLIENT_TLS_PATH = '/root/.docker'
+DOCKER_SERVICE = '/usr/lib/systemd/system/docker.service'
 
-def install_docker_agent():
+def install_docker():
     # install docker and eru-agent rpm package
     print '---> install docker packages ...'
     call_command('yum -y install docker-engine')
     print '---> install docker packages done'
+
+    print '---> copy service unit ...'
+    make_file(DOCKER_SERVICE, SERVICE_UNIT)
+    call_command('systemctl daemon-reload')
+    print '---> copy service unit done'
 
     # generate docker tls files
     print '---> generate docker tls certs ...'
     generate_certs()
     print '---> generate docker tls certs done'
 
+    # start docker
+    print '---> start docker ...'
+    call_command('systemctl start docker')
+    # fuck
+    count = 0
+    while count < 6:
+        print '---> wait for docker start'
+        time.sleep(1)
+        count += 1
+    print '---> start docker done ...'
 
 class TempSpace(object):
     def __init__(self):
@@ -68,6 +104,8 @@ def generate_certs():
         make_dir(DOCKER_CLIENT_TLS_PATH)
         [shutil.copy(cert, os.path.join(DOCKER_CLIENT_TLS_PATH, cert)) for cert in ('ca.pem', 'key.pem', 'cert.pem')]
 
+    call_command('systemctl start docker')
+
 def register_host():
     addr = '%s:2376' % IP
     pod_name = POD
@@ -80,6 +118,6 @@ def register_host():
     call_command(cmd)
 
 if __name__ == '__main__':
-    install_docker_agent()
+    install_docker()
     register_host()
 
