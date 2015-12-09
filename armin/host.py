@@ -30,7 +30,12 @@ class Host(object):
     def _execute(self, cmd):
         #logger.debug(cmd)
         #TODO be nice
-        chan = self.client.get_transport().open_session()
+        chan = self.client \
+            .get_transport() \
+            .open_session( \
+                window_size=2147483647, \
+                max_packet_size=2147483647, \
+            )
         chan.setblocking(0)
         try:
             chan.exec_command(cmd)

@@ -3,19 +3,22 @@
 
 import os
 from armin import config
-from tempfile import NamedTemporaryFile
+from armin.utils import make_remote_file
 
-def generate_mfsmount_service(mfsmaster, port, mount):
-    p = os.path.join(config.LOCAL_SERVICES_DIR, config.MOOSEFS_CLIENT_SERVICE)
-    with open(p) as fp:
-        return fp.read().format(mfsmaster=mfsmaster, port=port, mount=mount)
-
-def upload_mfsmount_service(upload_func, content):
-    with NamedTemporaryFile('w') as f:
-        p = os.path.join(config.REMOTE_SERVICES_DIR, config.MOOSEFS_CLIENT_SERVICE)
-        f.write(content)
-        f.flush()
-        if not upload_func(f.name, p):
+class MFSmount(object):
+    def __init__(self, config):
+        mfsmaster = config.get('mfsmaster')
+        port = config.get('port')
+        mount = config.get('mount')
+        if not mfsmaster or not port or not mount:
             return False
-    return True
+        self.mfsmaster = mfsmaster
+        self.port = port
+        self.mount = mount
+
+    def make_service(self, uploader):
+        p = os.path.join(config.LOCAL_SERVICES_DIR, config.MOOSEFS_CLIENT_SERVICE)
+        with open(p) as fp:
+            content = fp.read().format(mfsmaster=self.mfsmaster, port=self.port, mount=self.mount)
+        return make_remote_file(uploader, config.MOOSEFS_CLIENT_REMOTE_PATH, content)
 

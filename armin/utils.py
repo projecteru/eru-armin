@@ -5,6 +5,7 @@ import yaml
 import random
 from functools import partial
 from collections import OrderedDict
+from tempfile import NamedTemporaryFile
 
 SETS = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789~!@#$%^&*'
 
@@ -24,3 +25,10 @@ load_config = partial(ordered_load, Loader=yaml.SafeLoader)
 def get_random_passwd(string_length=8):
     return ''.join([random.choice(SETS) for _ in range(string_length)])
 
+def make_remote_file(upload_func, remote_path, content):
+    with NamedTemporaryFile('w') as f:
+        f.write(content)
+        f.flush()
+        if not upload_func(f.name, remote_path):
+            return False
+    return True

@@ -33,12 +33,17 @@ LOCAL_ULIMIT_CONF = '/Users/CMGS/Documents/Workplace/work/armin2/optimize/limits
 REMOTE_ULIMIT_CONF = '/etc/security/limits.conf'
 LOCAL_SYSCTL_FILE = '/Users/CMGS/Documents/Workplace/work/armin2/optimize/sysctl.py'
 
-REMOTE_SERVICES_DIR = '/usr/lib/systemd/system/'
 LOCAL_SERVICES_DIR = '/Users/CMGS/Documents/Workplace/work/armin2/services'
+
+FALCON_AGENT_CONF = 'cfg.json'
+FALCON_AGENT_REMOTE_PATH = '/etc/falcon-agent/cfg.json'
+
 MOOSEFS_CLIENT_SERVICE = 'mfsmount.service'
+MOOSEFS_CLIENT_REMOTE_PATH = '/usr/lib/systemd/system/mfsmount.service'
 
 SERVICE_MAP = {
-    'moosefs-client': 'mfsmount'
+    'moosefs-client': 'mfsmount',
+    'falcon-agent': 'falcon-agent',
 }
 
 
