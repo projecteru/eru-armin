@@ -230,7 +230,9 @@ class Host(object):
                 name = service.replace('-', '_')
                 func = getattr(svrs, 'install_%s' % name, None)
                 if func:
-                    r[service] = func(**params)
+                    enable = params.get('enable', None)
+                    config = params.get('config', None)
+                    r[service] = func(config, enable)
             result['install'] = r
 
         if modify:
@@ -240,7 +242,9 @@ class Host(object):
                 name = service.replace('-', '_')
                 func = getattr(svrs, 'modify_%s' % name, None)
                 if func:
-                    r[service] = func(**params)
+                    update = params.get('update', None)
+                    config = params.get('config', None)
+                    r[service] = func(update, config)
             result['modify'] = r
 
         if restart:
