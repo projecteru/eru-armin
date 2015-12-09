@@ -7,7 +7,6 @@ GATEWAY_CONFIG = 'GATEWAY=%s'
 RESOLV_CONF = '/etc/resolv.conf'
 HOSTS_CONF = '/etc/hosts'
 
-EXECUTE_EXCEPTION_CODE = -1
 EXECUTE_OK = 0
 
 LOCAL_REPO_DIR = '/Users/CMGS/Documents/Workplace/work/armin2/repos/'
@@ -37,5 +36,9 @@ LOCAL_SYSCTL_FILE = '/Users/CMGS/Documents/Workplace/work/armin2/optimize/sysctl
 REMOTE_SERVICES_DIR = '/usr/lib/systemd/system/'
 LOCAL_SERVICES_DIR = '/Users/CMGS/Documents/Workplace/work/armin2/services'
 MOOSEFS_CLIENT_SERVICE = 'mfsmount.service'
+
+SERVICE_MAP = {
+    'moosefs-client': 'mfsmount'
+}
 
 

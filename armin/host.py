@@ -19,50 +19,37 @@ class Host(object):
 
     def _add_sudo(self, username):
         cmd = '''gpasswd -a %s wheel''' % username
-        code, err = self._execute(cmd)
-        if code != config.EXECUTE_OK:
-            logger.info(err)
-            return False
-        return True
+        return self._execute(cmd)
 
     def _set_password(self, username, password):
         cmd = '''echo -e '{password}\n{password}\n' | passwd {username} --stdin'''.format(
             password = password, username = username,
         )
-        code, err = self._execute(cmd)
-        if code != config.EXECUTE_OK:
-            logger.info(err)
-            return False
-        return True
+        return self._execute(cmd)
 
     def _execute(self, cmd):
-        logger.debug(cmd)
+        #logger.debug(cmd)
+        #TODO be nice
+        print '*'*40
         chan = self.client.get_transport().open_session()
         chan.setblocking(0)
-        err = ''
         try:
             chan.exec_command(cmd)
             while True:
-                if chan.exit_status_ready() or chan.closed:
-                    break
                 rl, wl, xl = select.select([chan], [], [], 1)
                 if chan in rl and chan.recv_stderr_ready():
-                    #TODO be nice
-                    data = chan.recv_stderr(1024)
-                    err += data
-                    print data,
+                    print chan.recv_stderr(1024)
                 elif chan in rl and chan.recv_ready():
                     print chan.recv(1024),
+                if chan.exit_status_ready() or chan.closed:
+                    break
         except Exception, e:
             logger.exception(e)
-            return config.EXECUTE_EXCEPTION_CODE, str(e)
+            return False
 
         exit_status = chan.recv_exit_status()
-        logger.info('%s exit code %d' % (cmd, exit_status))
-        if exit_status != 0:
-            return exit_status, err
-        else:
-            return exit_status, ''
+        print cmd, exit_status
+        return exit_status == config.EXECUTE_OK
 
     def _upload(self, src, dst):
         sftp = self.client.get_transport().open_sftp_client()
@@ -77,56 +64,45 @@ class Host(object):
             sftp.close()
         return True
 
+    def _replace_hosts(self, old, new):
+        cmd = '''sed -i '/^%s/{h;s/.*/%s/};${x;/^$/{s//%s/;H};x}' %s '''
+        cmd = cmd % (old, new, new, config.HOSTS_CONF)
+        return self._execute(cmd)
+
     def set_hostname(self, hostname):
         logger.info('set hostname')
         cmd = 'hostnamectl set-hostname %s --static' % hostname
-        code, err = self._execute(cmd)
-        if code != config.EXECUTE_OK:
-            logger.info(err)
+        if not self._execute(cmd):
             return False
+
+        old = "%s '$HOSTNAME'" % self.server
+        new = "%s %s" % (self.server, hostname)
+        local_new = "127.0.0.1 %s" % hostname
+        if not self._replace_hosts(old, new) or not self._replace_hosts("127.0.0.1 '$HOSTNAME'", local_new):
+            return False
+
         cmd = 'hostname %s' % hostname
-        code, err = self._execute(cmd)
-        if code != config.EXECUTE_OK:
-            logger.info(err)
-            return False
-        return True
+        return self._execute(cmd)
 
     def set_hosts(self, **kwargs):
         logger.info('set hosts')
-        old = '-'.join(self.server.split('.'))
-        cmd = '''sed -i 's/%s/'"$HOSTNAME"'/g' %s''' % (old, config.HOSTS_CONF)
-        code, err = self._execute(cmd)
-        if code != config.EXECUTE_OK:
-            logger.info(err)
-            return False
-        new = '\n'.join(['%s %s' % (server, name) for name, server in kwargs.iteritems()])
-        cmd = '''sed -i '$ a %s' %s''' % (new, config.HOSTS_CONF)
-        code, err = self._execute(cmd)
-        if code != config.EXECUTE_OK:
-            logger.info(err)
-            return False
-        return True
+        result = dict([
+            (server, self._replace_hosts(server, '%s %s' % (server, name))) for server, name in kwargs.iteritems()
+        ])
+        return result
 
     def rm_hosts(self, *args):
         logger.info('delete host')
         s = ';'.join(['/%s$/d' % name for name in args])
         cmd = '''sed -i '%s' %s''' % (s, config.HOSTS_CONF)
-        code, err = self._execute(cmd)
-        if code != config.EXECUTE_OK:
-            logger.info(err)
-            return False
-        return True
+        return self._execute(cmd)
 
     def update_system(self, quite=False):
         logger.info('update system')
         cmd = 'yum update -y'
         if quite:
             cmd = 'yum update -y -q'
-        code, err = self._execute(cmd)
-        if code != config.EXECUTE_OK:
-            logger.info(err)
-            return False
-        return True
+        return self._execute(cmd)
 
     def set_gateway_and_dns(self, interface, gateway, dns, domain):
         logger.info('set gateway and dns')
@@ -135,24 +111,16 @@ class Host(object):
             s.append('domain %s' % domain)
         cmd = '''echo -e '%s' > %s''' % ('\n'.join(s), config.RESOLV_CONF)
         config_file = config.INTERFACE_CONFIG % interface
-        gateway = config.GATEWAY_CONFIG % gateway
-        code, err = self._execute(cmd)
-        if code != config.EXECUTE_OK:
-            logger.info(err)
+        if not self._execute(cmd):
             return False
         # clean ifcfg resolver and getway config
         # set new gateway
+        gateway = config.GATEWAY_CONFIG % gateway
         cmd = '''sed -i '/DNS/d;/DOMAIN/d;/GATEWAY/d;/NETMASK/a %s' %s''' % (gateway, config_file)
-        code, err = self._execute(cmd)
-        if code != config.EXECUTE_OK:
-            logger.info(err)
+        if not self._execute(cmd):
             return False
         cmd = 'systemctl restart network -q'
-        code, err = self._execute(cmd)
-        if code != config.EXECUTE_OK:
-            logger.info(err)
-            return False
-        return True
+        return self._execute(cmd)
 
     def add_repo(self, *args):
         result = {}
@@ -163,16 +131,9 @@ class Host(object):
         return result
 
     def rm_repo(self, *args):
-        result = {}
-        for repo in args:
-            result[repo] = True
-            target = os.path.join(config.REMOTE_REPO_DIR, repo)
-            cmd = 'rm -rf %s' % target
-            code, err = self._execute(cmd)
-            if code != config.EXECUTE_OK:
-                logger.info(err)
-                result[repo] = False
-        return result
+        return dict([
+            (repo, self._execute('rm -rf %s' % os.path.join(config.REMOTE_REPO_DIR, repo)))for repo in args
+        ])
 
     def add_user(self, **kwargs):
         result = {}
@@ -186,9 +147,7 @@ class Host(object):
                 user.get_shell(),
                 user.username,
             )
-            code, err = self._execute(cmd)
-            if code != config.EXECUTE_OK:
-                logger.info(err)
+            if not self._execute(cmd):
                 continue
             result[username]['add'] = True
             password = user.get_password(config.PASSWORD_LENGTH)
@@ -202,9 +161,7 @@ class Host(object):
                     username = username,
                     content = user.get_key(),
                 )
-                code, err = self._execute(cmd)
-                if code != config.EXECUTE_OK:
-                    logger.info(err)
+                if not self._execute(cmd):
                     continue
                 result[username]['key_auth'] = True
             if user.sudo:
@@ -212,32 +169,19 @@ class Host(object):
         return result
 
     def rm_user(self, *args):
-        result = {}
-        for username in args:
-            result[username] = True
-            cmd = '''userdel -r -f %s''' % username
-            code, err = self._execute(cmd)
-            if code != config.EXECUTE_OK:
-                logger.info(err)
-                result[username] = False
-        return result
+        return dict([
+            (username, self._execute('''userdel -r -f %s''' % username)) for username in args
+        ])
 
     def rm_sudo(self, *args):
-        result = {}
-        for username in args:
-            result[username] = True
-            cmd = '''gpasswd -d %s wheel''' % username
-            code, err = self._execute(cmd)
-            if code != config.EXECUTE_OK:
-                logger.info(err)
-                result[username] = False
-        return result
+        return dict([
+            (username, self._execute('''gpasswd -d %s wheel''' % username)) for username in args
+        ])
 
     def add_sudo(self, *args):
-        result = {}
-        for username in args:
-            result[username] = self._add_sudo(username)
-        return result
+        return dict([
+            (username, self._add_sudo(username)) for username in args
+        ])
 
     def security_root(self, random_password=False, root_key=False, security_login=None):
         result = {'random_password': False, 'root_key': False, 'security_login': False}
@@ -251,11 +195,7 @@ class Host(object):
             cmd += ''' && sed -i '/Match/d;$d' {config}'''.format(config=config.SSHD_CONFIG)
             cmd += ''' && sed -i '$a Match Address {addr}\\n   PermitRootLogin yes' {config}'''.format(addr=','.join(security_login), config=config.SSHD_CONFIG)
             cmd += ''' && service sshd restart'''
-            code, err = self._execute(cmd)
-            if code != config.EXECUTE_OK:
-                logger.info(err)
-            else:
-                result['security_login'] = True
+            result['security_login'] = self._execute(cmd)
 
         if root_key:
             cmd = '''mkdir -p {root_ssh_path}'''.format(root_ssh_path=Root.get_ssh_path())
@@ -264,11 +204,7 @@ class Host(object):
                     root_authorized_keys=Root.get_authorized_keys_path()
             )
             cmd += ''' && chmod 600 {root_authorized_keys}'''.format(root_authorized_keys=Root.get_authorized_keys_path())
-            code, err = self._execute(cmd)
-            if code != config.EXECUTE_OK:
-                logger.info(err)
-            else:
-                result['root_key'] = True
+            result['root_key'] = self._execute(cmd)
 
         return result
 
@@ -277,11 +213,7 @@ class Host(object):
 
         if sysctl and self._upload(config.LOCAL_SYSCTL_FILE, '/tmp/init.py'):
             cmd = 'python /tmp/init.py && rm -rf /tmp/init.py'
-            code, err = self._execute(cmd)
-            if code != config.EXECUTE_OK:
-                logger.info(err)
-            else:
-                result['sysctl'] = True
+            result['sysctl'] = self._execute(cmd)
 
         if ulimit:
             result['ulimit'] = self._upload(config.LOCAL_ULIMIT_CONF, config.REMOTE_ULIMIT_CONF)
