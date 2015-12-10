@@ -54,6 +54,13 @@ class Service(object):
             return self.host._execute(cmd)
         return False
 
+    def modify_docker(self, update, config=None):
+        #TODO config useless
+        if not update:
+            return True
+        cmd = 'yum update docker-engine -y && systemctl restart docker'
+        return self.host._execute(cmd)
+
     def install_moosefs_client(self, config, enable=False):
         svr = mfsmount.MFSmount(config)
         if not svr:
