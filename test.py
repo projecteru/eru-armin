@@ -24,8 +24,6 @@ if __name__ == '__main__':
                 continue
             print '*'*40
             print method
-            if method in ['services']:
-                print func(**params)
             if method == 'set_hostname':
                 hostname = params.get('hostname')
                 #TODO check
