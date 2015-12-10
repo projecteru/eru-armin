@@ -76,10 +76,10 @@ def install_docker():
 class TempSpace(object):
     def __init__(self):
         path = tempfile.mkdtemp()
-        self.current_path = self.path = os.path.expanduser(path)
+        self.path = os.path.expanduser(path)
 
     def __enter__(self):
-        self.current_path = os.path.dirname(__file__)
+        self.current_path = os.getcwd()
         os.chdir(self.path)
 
     def __exit__(self, etype, value, tb):
@@ -89,9 +89,10 @@ class TempSpace(object):
 IP = '{ip}'
 POD = '{pod}'
 ERU = '{eru}'
+BUILDER = '{builder}'
 
 def generate_certs():
-    builder = os.path.join(os.getcwd(), 'certs')
+    builder = os.path.join(os.getcwd(), BUILDER)
     with TempSpace():
         call_command('sh %s %s %s' % (builder, IP, os.getcwd()))
 

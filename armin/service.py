@@ -2,8 +2,8 @@
 #coding:utf-8
 
 import logging
-from armin import config
 
+from armin import config as armin_config
 from armin.services import docker
 from armin.services import mfsmount
 from armin.services import falcon_agent
@@ -18,7 +18,7 @@ class Service(object):
 
     def restart(self, services):
         return dict([
-            (service, self.host._execute('systemctl restart %s' % config.SERVICE_MAP[service])) for service in services
+            (service, self.host._execute('systemctl restart %s' % armin_config.SERVICE_MAP[service])) for service in services
         ])
 
     def modify_moosefs_client(self, update=False, config=None):
@@ -81,10 +81,20 @@ class Service(object):
             return False
         if not svr.make_service(self.host._upload):
             return False
-        cmd = 'cd /tmp && python /tmp/dockersetup.py && rm -rf /tmp/dockersetup.py && rm -rf /tmp/certs'
+        cmd = 'cd {workdir} && python {setup} && rm -rf {setup} {certs}'
+        cmd = cmd.format(
+            workdir = armin_config.REMOTE_DOCKER_WORKDIR,
+            setup = armin_config.DOCKER_SETUP,
+            certs = armin_config.DOCKER_GENERATOR,
+        )
         if not self.host._execute(cmd):
             return False
-        cmd = 'chmod +x /usr/bin/docker-enter && chmod +x /usr/bin/nsenter'
+        cmd = 'cd {bindir} && chmod +x {docker_enter} && chmod +x {nsenter}'
+        cmd = cmd.format(
+            bindir = armin_config.REMOTE_BIN_DIR,
+            docker_enter = armin_config.DOCKER_ENTER,
+            nsenter = armin_config.DOCKER_NSENTER,
+        )
         if enable:
             cmd += ' && systemctl enable docker'
         return self.host._execute(cmd)

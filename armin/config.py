@@ -42,11 +42,13 @@ LOCAL_SERVICES_DIR = os.path.join(BASE_PATH, 'services')
 FALCON_AGENT_CONF = 'cfg.json'
 MOOSEFS_CLIENT_SERVICE = 'mfsmount.service'
 
-DOCKER_SERVICE = 'docker.service'
 DOCKER_SETUP = 'docker.py'
 DOCKER_GENERATOR = 'certs'
 DOCKER_NSENTER = 'nsenter'
 DOCKER_ENTER = 'docker-enter'
+
+REMOTE_DOCKER_WORKDIR = '/tmp'
+REMOTE_BIN_DIR = '/usr/bin'
 
 FALCON_AGENT_REMOTE_PATH = '/etc/falcon-agent/cfg.json'
 MOOSEFS_CLIENT_REMOTE_PATH = '/usr/lib/systemd/system/mfsmount.service'
