@@ -16,29 +16,22 @@ class Docker(object):
         self.eru = eru
         self.ip = ip
 
+    def _copy_to_remote(self, uploader, f, remote_dir=config.REMOTE_DOCKER_WORKDIR, **kwargs):
+        local_path = os.path.join(config.LOCAL_SERVICES_DIR, f)
+        remote_path = os.path.join(remote_dir, f)
+        with open(local_path) as fp:
+            if kwargs:
+                content = fp.read().format(**kwargs)
+            else:
+                content = fp.read()
+        return make_remote_file(uploader, remote_path, content)
+
     def make_service(self, uploader):
-        p = os.path.join(config.LOCAL_SERVICES_DIR, config.DOCKER_SETUP)
-        rp = os.path.join(config.REMOTE_DOCKER_WORKDIR, config.DOCKER_SETUP)
-        with open(p) as fp:
-            content = fp.read().format(
-                ip=self.ip, pod=self.pod, eru=self.eru, builder=config.DOCKER_GENERATOR
-            )
-        r1 = make_remote_file(uploader, rp, content)
-        p = os.path.join(config.LOCAL_SERVICES_DIR, config.DOCKER_GENERATOR)
-        rp = os.path.join(config.REMOTE_DOCKER_WORKDIR, config.DOCKER_GENERATOR)
-        with open(p) as fp:
-            content = fp.read()
-        r2 = make_remote_file(uploader, rp, content)
-        p = os.path.join(config.LOCAL_SERVICES_DIR, config.DOCKER_NSENTER)
-        rp = os.path.join(config.REMOTE_BIN_DIR, config.DOCKER_NSENTER)
-        with open(p) as fp:
-            content = fp.read()
-        r3 = make_remote_file(uploader, rp, content)
-        p = os.path.join(config.LOCAL_SERVICES_DIR, config.DOCKER_ENTER)
-        rp = os.path.join(config.REMOTE_BIN_DIR, config.DOCKER_ENTER)
-        with open(p) as fp:
-            content = fp.read()
-        r4 = make_remote_file(uploader, rp, content)
-        #TODO fix root bashrc
-        return r1 and r2 and r3 and r4
+        return self._copy_to_remote(
+                    uploader, config.DOCKER_SETUP,
+                    ip=self.ip, eru=self.eru,
+                    pod=self.pod, builder=config.DOCKER_GENERATOR) and \
+                self._copy_to_remote(uploader, config.DOCKER_GENERATOR) and \
+                self._copy_to_remote(uploader, config.DOCKER_NSENTER, config.REMOTE_BIN_DIR) and \
+                self._copy_to_remote(uploader, config.DOCKER_ENTER, config.REMOTE_BIN_DIR)
 
