@@ -71,13 +71,34 @@ test:
         falcon-agent:
           enable: True
           config:
-            hbs: 10.10.181.150:6030
-            transfer: 10.10.194.26:8433
+            heartbeat:
+              addr: 10.10.181.150:6030
+            transfer:
+              addr: 10.10.194.26:8433
         docker:
           enable: True
           config:
-            pod: dev
+            pod: dns
             eru: eru.nova.ricebook.net
+        eru-agent:
+          enable: True
+          config:
+            api:
+              addr: 0.0.0.0:12345
+            redis:
+              host: 10.10.11.59
+              port: 6379
+            transfers:
+              - 10.10.194.26:8433
+            lenz:
+              stdout: False
+              count: 20
+              forwards:
+                - tcp://log.nova.ricebook.net:50433
+            docker:
+              health: 30
+            eru:
+              endpoint: http://eru.nova.ricebook.net
       modify:
         moosefs-client:
           update: True
@@ -88,8 +109,12 @@ test:
         falcon-agent:
           update: True
           config:
-            hbs: 10.10.181.150:6030
-            transfer: 10.10.194.26:8433
+            debug: false
+        eru-agent:
+          config:
+            lenz:
+              count: 100
       restart:
         - moosefs-client
-
+        - falcon-agent
+        - eru-agent
