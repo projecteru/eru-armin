@@ -47,16 +47,19 @@ DOCKER_GENERATOR = 'certs'
 DOCKER_NSENTER = 'nsenter'
 DOCKER_ENTER = 'docker-enter'
 
+ERU_AGENT_CONFIG_FILE = 'agent.yaml'
+
 REMOTE_DOCKER_WORKDIR = '/tmp'
 REMOTE_BIN_DIR = '/usr/bin'
+REMOTE_SERVICE_DIR = '/usr/lib/systemd/system'
 
-FALCON_AGENT_REMOTE_PATH = '/etc/falcon-agent/cfg.json'
-MOOSEFS_CLIENT_REMOTE_PATH = '/usr/lib/systemd/system/mfsmount.service'
-DOCKER_REMOTE_PATH = '/usr/lib/systemd/system/docker.service'
+REMOTE_ERU_AGENT_CONFIG_PATH = '/etc/eru-agent/'
+REMOTE_FALCON_AGENT_CONFIG_PATH = '/etc/falcon-agent/'
 
 SERVICE_MAP = {
     'moosefs-client': 'mfsmount',
     'falcon-agent': 'falcon-agent',
     'docker': 'docker',
+    'eru-agent': 'eru-agent',
 }
 

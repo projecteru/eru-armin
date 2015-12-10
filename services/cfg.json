@@ -10,13 +10,13 @@
     },
     "heartbeat": {
         "enabled": true,
-        "addr": "{hbs}",
+        "addr": "10.10.181.150:6030",
         "interval": 60,
         "timeout": 1000
     },
     "transfer": {
         "enabled": true,
-        "addr": "{transfer}",
+        "addr": "10.10.194.26:8433",
         "interval": 60,
         "timeout": 1000
     },
