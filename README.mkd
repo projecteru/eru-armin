@@ -1,0 +1,49 @@
+Eru Armin
+===========
+
+这就是一个自动初始化服务器的幺蛾子，只针对于 CentOS 7
+
+Install
+===========
+
+先 Clone
+
+```
+git clone https://github.com/projecteru/eru-armin.git
+```
+
+如果不想扩展了
+
+```
+python setup.py install
+```
+
+如果想扩展
+
+```
+python setup.py develop
+```
+
+这货只依赖
+
+[paramiko](https://github.com/paramiko/paramiko)
+
+好了现在你可以开始用了
+
+Usage
+===========
+
+作为一个简化版的[ansible](http://www.ansible.com/), 这货实现了自己的一套近似于 playbook 的机制，可以参考 example.yaml 的描述。
+
+注意，*methods 是有序的, 所以请注意顺序*。
+
+然后，你需要写一个 local_config.py 来解决配置问题，具体配置项可以参考[这里](https://github.com/projecteru/eru-armin/master/armin/config.py)。
+
+最后配置好相应的文件夹和对应需要 upload 的文件过去，执行入口文件就可以了咯。
+
+什么没入口？呃，这个得让另外一个作者幸苦的用[click](http://click.pocoo.org/5/)包装下了。
+
+Methods
+============
+
+哪天心情好了就来更新这块……
