@@ -1,6 +1,0 @@
-[ricebook]
-name=Ricebook Repository
-baseurl=http://repo.ricebook.net/centos/7/noarch/
-enabled=1
-gpgcheck=0
-

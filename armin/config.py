@@ -63,3 +63,7 @@ SERVICE_MAP = {
     'eru-agent': 'eru-agent',
 }
 
+try:
+    from local_config import *
+except ImportError:
+    pass
