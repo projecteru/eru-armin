@@ -33,17 +33,33 @@ python setup.py develop
 Usage
 ===========
 
-作为一个简化版的[ansible](http://www.ansible.com/), 这货实现了自己的一套近似于 playbook 的机制，可以参考 example.yaml 的描述。
+作为一个简化版的 [ansible](http://www.ansible.com/), 这货实现了自己的一套近似于 playbook 的机制，可以参考 example.yaml 的描述。
 
-注意，*methods 是有序的, 所以请注意顺序*。
+注意，**methods 是有序的, 所以请注意顺序**。
 
 然后，你需要写一个 local_config.py 来解决配置问题，具体配置项可以参考[这里](https://github.com/projecteru/eru-armin/master/armin/config.py)。
 
 最后配置好相应的文件夹和对应需要 upload 的文件过去，执行入口文件就可以了咯。
 
-什么没入口？呃，这个得让另外一个作者幸苦的用[click](http://click.pocoo.org/5/)包装下了。
+什么没入口？呃，这个得让另外一个作者幸苦的用 [click](http://click.pocoo.org/5/) 包装下了。
+
+或者参考我现在用的工作环境 [auto-ricebook](https://github.com/CMGS/auto-ricebook) ,放心我已经干掉了所有 pubkey 了哈哈哈。
 
 Methods
 ============
 
 哪天心情好了就来更新这块……
+
+Add new service
+============
+
+这个其实还是蛮简单的
+
+* 自定义一个 Class，继承于 armin.services.Service，实现自己的 install 和 modify 方法。
+* 丢到 sys.path 中，让 importlib 可以通过等价于 from armin.services.xxx import YYY 这样找到。
+* 把配置丢到自己的 local_config.py 里面，更新 config.SERVICE_MAP 和 config.SERVICE_CLS_MAP。
+* 把需要干脏活的脚本啊文件啊丢到 config.LOCAL_SERVICES_DIR 目录里面。
+* 好了修改自己的 playbook.yaml 吧，在 services 方法里面去操控 install/modify/restart 咯。
+
+注意，**restart 的实现目前极其简单，就是 systemctl restart name**。
+
