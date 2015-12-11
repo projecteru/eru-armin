@@ -6,7 +6,7 @@ import select
 import logging
 from armin import config
 from armin.user import User, Root
-from armin.service import Service
+from armin.services import get_service
 from armin.utils import get_random_passwd
 
 logger = logging.getLogger(__name__)
@@ -232,35 +232,35 @@ class Host(object):
         return result
 
     def services(self, install=None, modify=None, restart=None):
-        svrs = Service(self)
         result = {}
         if install:
             r = {}
             for service, params in install.iteritems():
                 r[service] = False
-                name = service.replace('-', '_')
-                func = getattr(svrs, 'install_%s' % name, None)
-                if func:
-                    enable = params.get('enable', None)
-                    config = params.get('config', None)
-                    r[service] = func(config, enable)
+                enable = params.get('enable', False)
+                conf = params.get('config', {})
+                svr = get_service(service, conf, self._upload, self._execute)
+                if not svr:
+                    continue
+                r[service] = svr.install(enable, ip=self.server)
             result['install'] = r
 
         if modify:
             r = {}
             for service, params in modify.iteritems():
                 r[service] = False
-                name = service.replace('-', '_')
-                func = getattr(svrs, 'modify_%s' % name, None)
-                if func:
-                    update = params.get('update', None)
-                    config = params.get('config', None)
-                    r[service] = func(update, config)
+                update = params.get('update', False)
+                conf = params.get('config', {})
+                svr = get_service(service, conf, self._upload, self._execute)
+                if not svr:
+                    continue
+                r[service] = svr.update(update)
             result['modify'] = r
 
         if restart:
-            r = svrs.restart(restart)
-            result['restart'] = r
+            result['restart'] = dict([
+                (service, self._execute('systemctl restart %s' % config.SERVICE_MAP[service])) for service in restart
+            ])
 
         return result
 

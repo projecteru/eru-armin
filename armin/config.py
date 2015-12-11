@@ -63,6 +63,13 @@ SERVICE_MAP = {
     'eru-agent': 'eru-agent',
 }
 
+SERVICE_CLS_MAP = {
+    'moosefs-client': 'mfsmount.MFSmount',
+    'falcon-agent': 'falcon_agent.FalconAgent',
+    'docker': 'docker.Docker',
+    'eru-agent': 'eru_agent.EruAgent',
+}
+
 try:
     from local_config import *
 except ImportError:
