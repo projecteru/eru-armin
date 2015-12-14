@@ -124,7 +124,7 @@ class Host(object):
         cmd = '''sed -i '/DNS/d;/DOMAIN/d;/GATEWAY/d;/NETMASK/a %s' %s && systemctl restart network -q''' % (gateway, config_file)
         return self._execute(cmd)
 
-    def set_dns(self, dns, domain):
+    def set_dns(self, dns, domain=None):
         logger.info('set dns')
         s = ['nameserver %s' % ip for ip in dns]
         if domain:
