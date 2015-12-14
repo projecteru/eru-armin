@@ -1,3 +1,6 @@
+#!/usr/bin/python
+#coding:utf-8
+
 import logging
 import importlib
 from armin import config
