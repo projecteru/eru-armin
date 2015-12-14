@@ -1,0 +1,12 @@
+[Unit]
+Description=MooseFS mounts
+After=syslog.target network.target
+
+[Service]
+Type=forking
+TimeoutSec=600
+ExecStart=/usr/bin/mfsmount -H {mfsmaster} -P {port} {mount}
+ExecStop=/usr/bin/umount {mount}
+
+[Install]
+WantedBy=multi-user.target

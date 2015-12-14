@@ -1,0 +1,39 @@
+pidfile: /var/run/agent.pid
+
+eru:
+  endpoint: http://eru.nova.ricebook.net
+
+docker:
+  endpoint: tcp://127.0.0.1:2376
+  cert: /root/.docker/cert.pem
+  key: /root/.docker/key.pem
+  ca: /root/.docker/ca.pem
+  health: 30
+
+lenz:
+  forwards:
+    - tcp://log.nova.ricebook.net:50433
+  stdout: False
+  count: 20
+
+metrics:
+  step: 30
+  timeout: 1000
+  transfers:
+    - 10.10.194.26:8433
+
+vlan:
+  physical:
+    - eth0
+
+redis:
+  host: 10.10.11.59
+  port: 6379
+  min: 5
+  max: 100
+
+api:
+  http: true
+  pubsub: true
+  addr: 0.0.0.0:12345
+
