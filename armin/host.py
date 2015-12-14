@@ -115,7 +115,7 @@ class Host(object):
             cmd = 'yum update -y -q'
         return self._execute(cmd)
 
-    def set_gatewaydns(self, interface, gateway):
+    def set_gateway(self, interface, gateway):
         logger.info('set gateway')
         config_file = config.INTERFACE_CONFIG % interface
         # clean ifcfg resolver and getway config
