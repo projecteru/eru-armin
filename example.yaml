@@ -8,9 +8,10 @@ test:
     set_hostname:
       hostname: zzz
       incr: True
-    set_gateway_and_dns:
+    set_gateway:
       interface: eth0
       gateway: 10.10.196.88
+    set_dns:
       dns:
         - 10.10.99.43
       domain: ricebook.net

@@ -115,22 +115,21 @@ class Host(object):
             cmd = 'yum update -y -q'
         return self._execute(cmd)
 
-    def set_gateway_and_dns(self, interface, gateway, dns, domain):
-        logger.info('set gateway and dns')
+    def set_gatewaydns(self, interface, gateway):
+        logger.info('set gateway')
+        config_file = config.INTERFACE_CONFIG % interface
+        # clean ifcfg resolver and getway config
+        # set new gateway
+        gateway = config.GATEWAY_CONFIG % gateway
+        cmd = '''sed -i '/DNS/d;/DOMAIN/d;/GATEWAY/d;/NETMASK/a %s' %s && systemctl restart network -q''' % (gateway, config_file)
+        return self._execute(cmd)
+
+    def set_dns(self, dns, domain):
+        logger.info('set dns')
         s = ['nameserver %s' % ip for ip in dns]
         if domain:
             s.append('domain %s' % domain)
         cmd = '''echo -e '%s' > %s''' % ('\n'.join(s), config.RESOLV_CONF)
-        config_file = config.INTERFACE_CONFIG % interface
-        if not self._execute(cmd):
-            return False
-        # clean ifcfg resolver and getway config
-        # set new gateway
-        gateway = config.GATEWAY_CONFIG % gateway
-        cmd = '''sed -i '/DNS/d;/DOMAIN/d;/GATEWAY/d;/NETMASK/a %s' %s''' % (gateway, config_file)
-        if not self._execute(cmd):
-            return False
-        cmd = 'systemctl restart network -q'
         return self._execute(cmd)
 
     def add_repo(self, *args):
