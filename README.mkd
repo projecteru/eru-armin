@@ -55,9 +55,9 @@ Add new service
 
 这个其实还是蛮简单的
 
-* 自定义一个 Class，继承于 armin.services.Service，实现自己的 install 和 modify 方法。
+* 自定义一个 Class，继承于 armin.services.Service，实现自己的 install 和 modify 方法(你要重写 restart 也可以)。
 * 丢到 sys.path 中，让 importlib 可以通过等价于 from armin.services.xxx import YYY 这样找到。
-* 把配置丢到自己的 local_config.py 里面，更新 config.SERVICE_MAP 和 config.SERVICE_CLS_MAP。
+* 把配置丢到自己的 local_config.py 里面，更新 config.SERVICE_CLS_MAP，mod 就是 mod 名，unit 就是 systemctl 控制的 service 名。
 * 把需要干脏活的脚本啊文件啊丢到 config.LOCAL_SERVICES_DIR 目录里面。
 * 好了修改自己的 playbook.yaml 吧，在 services 方法里面去操控 install/modify/restart 咯。
 
