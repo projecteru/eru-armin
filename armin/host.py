@@ -233,6 +233,7 @@ class Host(object):
 
     def services(self, install=None, modify=None, restart=None):
         result = {}
+
         if install:
             r = {}
             for service, params in install.iteritems():
@@ -258,9 +259,12 @@ class Host(object):
             result['modify'] = r
 
         if restart:
-            result['restart'] = dict([
-                (service, self._execute('systemctl restart %s' % config.SERVICE_MAP[service])) for service in restart
-            ])
+            result['restart'] = {}
+            for service in restart:
+                svr = get_service(service, {}, self._upload, self._execute)
+                if not svr:
+                    continue
+                result['restart'][service] = svr.restart()
 
         return result
 

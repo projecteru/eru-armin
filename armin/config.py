@@ -56,18 +56,19 @@ REMOTE_SERVICE_DIR = '/usr/lib/systemd/system'
 REMOTE_ERU_AGENT_CONFIG_PATH = '/etc/eru-agent/'
 REMOTE_FALCON_AGENT_CONFIG_PATH = '/etc/falcon-agent/'
 
-SERVICE_MAP = {
-    'moosefs-client': 'mfsmount',
-    'falcon-agent': 'falcon-agent',
-    'docker': 'docker',
-    'eru-agent': 'eru-agent',
-}
-
 SERVICE_CLS_MAP = {
-    'moosefs-client': 'mfsmount.MFSmount',
-    'falcon-agent': 'falcon_agent.FalconAgent',
-    'docker': 'docker.Docker',
-    'eru-agent': 'eru_agent.EruAgent',
+    'moosefs-client': {
+        'mod': 'mfsmount.MFSmount', 'unit': 'mfsmount',
+    },
+    'falcon-agent': {
+        'mod': 'falcon_agent.FalconAgent', 'unit': 'falcon-agent',
+    },
+    'docker': {
+        'mod': 'docker.Docker', 'unit': 'docker',
+    },
+    'eru-agent': {
+        'mod': 'eru_agent.EruAgent', 'unit': 'eru-agent',
+    },
 }
 
 try:
