@@ -66,31 +66,32 @@ test:
         moosefs-client:
           enable: True
           config:
-            mount: /tmp/mfs1
-            mfsmaster: 10.10.57.167
+            mount: /mnt/mfs
+            mfsmaster: mfsmaster.ricebook.net
             port: 9421
         falcon-agent:
           enable: True
           config:
             heartbeat:
-              addr: 10.10.181.150:6030
+              addr: hbs.nova.ricebook.net:6030
             transfer:
-              addr: 10.10.194.26:8433
+              addr: transfer.nova.ricebook.net:8433
         docker:
           enable: True
           config:
             pod: dns
             eru: eru.nova.ricebook.net
+            hub: hub.nova.ricebook.net
         eru-agent:
           enable: True
           config:
             api:
               addr: 0.0.0.0:12345
             redis:
-              host: 10.10.11.59
+              host: rds.nova.ricebook.net
               port: 6379
             transfers:
-              - 10.10.194.26:8433
+              - transfer.nova.ricebook.net:8433
             lenz:
               stdout: False
               count: 20

@@ -17,7 +17,7 @@ Requires=docker.socket
 
 [Service]
 Type=notify
-ExecStart=/usr/bin/docker daemon -H fd:// -H tcp://0.0.0.0:2376 --tlsverify --tlscacert=/etc/docker/tls/ca.pem --tlscert=/etc/docker/tls/server-cert.pem --tlskey=/etc/docker/tls/server-key.pem --insecure-registry hub.nova.ricebook.net
+ExecStart=/usr/bin/docker daemon -H fd:// -H tcp://0.0.0.0:2376 --tlsverify --tlscacert=/etc/docker/tls/ca.pem --tlscert=/etc/docker/tls/server-cert.pem --tlskey=/etc/docker/tls/server-key.pem --insecure-registry {hub}
 MountFlags=slave
 LimitNOFILE=10485760
 LimitNPROC=10485760

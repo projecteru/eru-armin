@@ -38,12 +38,13 @@ class Docker(Service):
         eru = self.params.get('eru')
         pod = self.params.get('pod')
         ip = self.params.get('ip')
-        if not eru or not pod or not ip:
+        hub = self.params.get('hub')
+        if not eru or not pod or not ip or not hub:
             return False
         return copy_to_remote(
                     self.uploader,
                     config.DOCKER_SETUP,
-                    ip=ip, eru=eru,
+                    ip=ip, eru=eru, hub=hub,
                     pod=pod, builder=config.DOCKER_GENERATOR) and \
                 copy_to_remote(self.uploader, config.DOCKER_GENERATOR) and \
                 copy_to_remote(self.uploader, config.DOCKER_NSENTER, config.REMOTE_BIN_DIR) and \
