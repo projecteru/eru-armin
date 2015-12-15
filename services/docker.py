@@ -57,6 +57,15 @@ def install_docker():
     call_command('systemctl daemon-reload')
     print '---> copy service unit done'
 
+    print '---> init data'
+    call_command('rm -rf /var/lib/docker')
+    call_command('mkdir -p /var/lib/docker/devicemapper/devicemapper')
+    call_command('mkdir -p /data/docker')
+    call_command('dd if=/dev/zero of=/data/docker/data bs=1G count=0 seek={data}')
+    call_command('dd if=/dev/zero of=/data/docker/meta bs=1G count=0 seek={meta}')
+    call_command('ln -s /data/docker/* /var/lib/docker/devicemapper/devicemapper/')
+    print '---> init data done'
+
     # generate docker tls files
     print '---> generate docker tls certs ...'
     generate_certs()

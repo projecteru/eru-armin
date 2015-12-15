@@ -8,6 +8,8 @@ test:
     set_hostname:
       hostname: zzz
       incr: True
+    run_commands:
+      - echo $HOSTNAME
     set_gateway:
       interface: eth0
       gateway: 10.10.196.88
@@ -82,6 +84,8 @@ test:
             pod: dns
             eru: eru.nova.ricebook.net
             hub: hub.nova.ricebook.net
+            meta: 50
+            data: 200
         eru-agent:
           enable: True
           config:
