@@ -80,6 +80,11 @@ class Host(object):
         cmd = cmd % (old, new, new, config.HOSTS_CONF)
         return self._execute(cmd)
 
+    def run_command(self, *args):
+        return dict([
+            (command, self._execute(command)) for command in args
+        ])
+
     def set_hostname(self, hostname):
         logger.info('set hostname')
         cmd = 'hostnamectl set-hostname %s --static' % hostname
