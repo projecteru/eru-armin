@@ -80,7 +80,7 @@ class Host(object):
         cmd = cmd % (old, new, new, config.HOSTS_CONF)
         return self._execute(cmd)
 
-    def run_command(self, *args):
+    def run_commands(self, *args):
         return dict([
             (command, self._execute(command)) for command in args
         ])
