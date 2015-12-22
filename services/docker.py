@@ -129,5 +129,5 @@ def register_host():
 
 if __name__ == '__main__':
     install_docker()
-    if POD:
-        register_host()
+    register_host()
+

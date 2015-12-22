@@ -18,23 +18,12 @@ class Docker(Service):
         )
         if not self.executor(cmd):
             return False
-
-        cmd = 'cd {bindir} && chmod +x {docker_enter} && chmod +x {nsenter} && chmod +x {calicoctl}'
+        cmd = 'cd {bindir} && chmod +x {docker_enter} && chmod +x {nsenter}'
         cmd = cmd.format(
             bindir = config.REMOTE_BIN_DIR,
             docker_enter = config.DOCKER_ENTER,
             nsenter = config.DOCKER_NSENTER,
-            calicoctl = config.CALICO_CTL,
         )
-        calico = self.params.pop('calico', None)
-        if calico:
-            image = calico.get('image', 'calico/node')
-            etcd = calico.get('etcd', '127.0.0.1:4001')
-            log = calico.get('log', '/var/log/calico')
-            cmd += ' && docker pull %s' % image
-            cmd += ' && export ETCD_AUTHORITY=%s' % etcd
-            cmd += ' && calicoctl node --node-image=%s --log-dir=%s --ip=%s' % (image, log, self.server)
-
         if enable:
             cmd += ' && systemctl enable docker'
         return self.executor(cmd)
@@ -47,12 +36,12 @@ class Docker(Service):
 
     def make_service(self):
         eru = self.params.get('eru')
+        pod = self.params.get('pod')
         ip = self.params.get('ip')
         hub = self.params.get('hub')
-        pod = self.params.get('pod', '')
         data = self.params.get('data', 100)
         meta = self.params.get('data', 20)
-        if not eru or not ip or not hub:
+        if not eru or not pod or not ip or not hub:
             return False
         return copy_to_remote(
                     self.uploader,
@@ -61,6 +50,5 @@ class Docker(Service):
                     pod=pod, builder=config.DOCKER_GENERATOR) and \
                 copy_to_remote(self.uploader, config.DOCKER_GENERATOR) and \
                 copy_to_remote(self.uploader, config.DOCKER_NSENTER, config.REMOTE_BIN_DIR) and \
-                copy_to_remote(self.uploader, config.DOCKER_ENTER, config.REMOTE_BIN_DIR) and \
-                copy_to_remote(self.uploader, config.CALICO_CTL, config.REMOTE_BIN_DIR)
+                copy_to_remote(self.uploader, config.DOCKER_ENTER, config.REMOTE_BIN_DIR)
 

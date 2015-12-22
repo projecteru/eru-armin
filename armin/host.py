@@ -244,7 +244,7 @@ class Host(object):
                 r[service] = False
                 enable = params.get('enable', False)
                 conf = params.get('config', {})
-                svr = get_service(self.server, service, conf, self._upload, self._execute)
+                svr = get_service(service, conf, self._upload, self._execute)
                 if not svr:
                     continue
                 r[service] = svr.install(enable, ip=self.server)
@@ -256,7 +256,7 @@ class Host(object):
                 r[service] = False
                 update = params.get('update', False)
                 conf = params.get('config', {})
-                svr = get_service(self.server, service, conf, self._upload, self._execute)
+                svr = get_service(service, conf, self._upload, self._execute)
                 if not svr:
                     continue
                 r[service] = svr.update(update)
@@ -265,7 +265,7 @@ class Host(object):
         if restart:
             result['restart'] = {}
             for service in restart:
-                svr = get_service(self.server, service, {}, self._upload, self._execute)
+                svr = get_service(service, {}, self._upload, self._execute)
                 if not svr:
                     continue
                 result['restart'][service] = svr.restart()

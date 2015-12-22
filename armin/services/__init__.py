@@ -7,7 +7,7 @@ from armin import config
 
 logger = logging.getLogger(__name__)
 
-def get_service(server, name, params, uploader, executor):
+def get_service(name, params, uploader, executor):
     mod_conf = config.SERVICE_CLS_MAP.get(name, None)
     if not mod_conf:
         return None
@@ -19,17 +19,16 @@ def get_service(server, name, params, uploader, executor):
     if not cls:
         return None
     try:
-        svr = cls(server, service_name, params, uploader, executor)
+        svr = cls(service_name, params, uploader, executor)
     except Exception, e:
         logger.exeception(e)
         return None
     return svr
 
 class Service(object):
-    def __init__(self, server, service_name, params, uploader, executor):
+    def __init__(self, service_name, params, uploader, executor):
         self.service_name = service_name
         self.params = params
-        self.server = server
         self.uploader = uploader
         self.executor = executor
 
