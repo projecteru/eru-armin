@@ -36,12 +36,12 @@ class Docker(Service):
 
     def make_service(self):
         eru = self.params.get('eru')
-        pod = self.params.get('pod')
         ip = self.params.get('ip')
         hub = self.params.get('hub')
+        pod = self.params.get('pod', '')
         data = self.params.get('data', 100)
         meta = self.params.get('data', 20)
-        if not eru or not pod or not ip or not hub:
+        if not eru or not ip or not hub:
             return False
         return copy_to_remote(
                     self.uploader,
