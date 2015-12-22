@@ -84,6 +84,10 @@ test:
             pod: dns
             eru: eru.nova.ricebook.net
             hub: hub.nova.ricebook.net
+            calico:
+              image: hub.nova.ricebook.net/calico/node:latest
+              etcd: 10.10.158.89:2379
+              log: /data/calico
             meta: 50
             data: 200
         eru-agent:

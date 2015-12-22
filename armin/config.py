@@ -47,6 +47,8 @@ DOCKER_GENERATOR = 'certs'
 DOCKER_NSENTER = 'nsenter'
 DOCKER_ENTER = 'docker-enter'
 
+CALICO_CTL = 'calicoctl'
+
 ERU_AGENT_CONFIG_FILE = 'agent.yaml'
 
 REMOTE_DOCKER_WORKDIR = '/tmp'
