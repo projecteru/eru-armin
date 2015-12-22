@@ -105,6 +105,12 @@ test:
               health: 30
             eru:
               endpoint: http://eru.nova.ricebook.net
+        calico:
+          enable: True
+          config:
+            image: hub.nova.ricebook.net/calico/node:latest
+            etcd: 10.10.158.89:2379
+            log: /data/calico
       modify:
         moosefs-client:
           update: True

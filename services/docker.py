@@ -63,7 +63,8 @@ def install_docker():
     call_command('mkdir -p /data/docker')
     call_command('dd if=/dev/zero of=/data/docker/data bs=1G count=0 seek={data}')
     call_command('dd if=/dev/zero of=/data/docker/meta bs=1G count=0 seek={meta}')
-    call_command('ln -s /data/docker/* /var/lib/docker/devicemapper/devicemapper/')
+    call_command('ln -s /data/docker/data /var/lib/docker/devicemapper/devicemapper/data')
+    call_command('ln -s /data/docker/meta /var/lib/docker/devicemapper/devicemapper/metadata')
     print '---> init data done'
 
     # generate docker tls files

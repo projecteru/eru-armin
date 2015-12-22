@@ -47,6 +47,8 @@ DOCKER_GENERATOR = 'certs'
 DOCKER_NSENTER = 'nsenter'
 DOCKER_ENTER = 'docker-enter'
 
+CALICOCTL = 'calicoctl'
+
 ERU_AGENT_CONFIG_FILE = 'agent.yaml'
 
 REMOTE_DOCKER_WORKDIR = '/tmp'
@@ -68,6 +70,9 @@ SERVICE_CLS_MAP = {
     },
     'eru-agent': {
         'mod': 'eru_agent.EruAgent', 'unit': 'eru-agent',
+    },
+    'calico': {
+        'mod': 'calico.Calico', 'unit': 'calico',
     },
 }
 
