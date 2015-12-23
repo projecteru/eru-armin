@@ -259,7 +259,7 @@ class Host(object):
                 svr = get_service(service, conf, self._upload, self._execute)
                 if not svr:
                     continue
-                r[service] = svr.update(update)
+                r[service] = svr.update(update, ip=self.server)
             result['modify'] = r
 
         if restart:
@@ -268,7 +268,7 @@ class Host(object):
                 svr = get_service(service, {}, self._upload, self._execute)
                 if not svr:
                     continue
-                result['restart'][service] = svr.restart()
+                result['restart'][service] = svr.restart(ip=self.server)
 
         return result
 

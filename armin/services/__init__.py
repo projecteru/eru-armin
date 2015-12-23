@@ -38,6 +38,6 @@ class Service(object):
     def update(self, update=False, **kwargs):
         pass
 
-    def restart(self):
+    def restart(self, **kwargs):
         #TODO 足够简单
         return self.executor('systemctl restart %s' % self.service_name)

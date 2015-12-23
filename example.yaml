@@ -126,6 +126,12 @@ test:
           config:
             lenz:
               count: 100
+        calico:
+          update: True
+          config:
+            image: hub.nova.ricebook.net/calico/node:latest
+            etcd: 10.10.158.89:2379
+            log: /data/calico
       restart:
         - moosefs-client
         - falcon-agent

@@ -27,7 +27,7 @@ class Calico(Service):
         return self.executor(cmd)
 
     def update(self, update=False, **kwargs):
-        pass
+        self.params.update(kwargs)
 
-    def restart(self):
+    def restart(self, **kwargs):
         raise NotImplementedError()

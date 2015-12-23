@@ -19,10 +19,10 @@ class EruAgent(Service):
         return self.executor(cmd)
 
     def update(self, update=False, **kwargs):
-        if update and not config:
+        if update and not self.params:
             cmd = 'systemctl stop eru-agent && yum update eru-agent -y && systemctl start eru-agent'
             return self.executor(cmd)
-        if not config:
+        if not self.params:
             return True
         if not self.make_service():
             return False
