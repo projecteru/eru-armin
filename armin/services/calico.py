@@ -27,7 +27,21 @@ class Calico(Service):
         return self.executor(cmd)
 
     def update(self, update=False, **kwargs):
+        if not update or not self.params:
+            return False
         self.params.update(kwargs)
+        cmd = 'calicoctl node stop && calicoctl node remove'
+        etcd = self.params.get('etcd')
+        image = self.params.get('image', 'calico/node')
+        log = self.params.get('log', '/var/log/calico')
+        ip = self.params.get('ip')
+        if not etcd or not ip:
+            return False
+        cmd += ' && docker pull %s' % image
+        cmd += ' && export ETCD_AUTHORITY=%s' % etcd
+        cmd += ' && calicoctl node --node-image=%s --log-dir=%s --ip=%s' % (image, log, ip)
+        return self.executor(cmd)
 
     def restart(self, **kwargs):
         raise NotImplementedError()
+
