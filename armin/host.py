@@ -88,17 +88,14 @@ class Host(object):
     def set_hostname(self, hostname):
         logger.info('set hostname')
         cmd = 'hostnamectl set-hostname %s --static' % hostname
+        cmd += ' && hostname %s' % hostname
         if not self._execute(cmd):
             return False
 
         old = "%s '$HOSTNAME'" % self.server
         new = "%s %s" % (self.server, hostname)
         local_new = "127.0.0.1 %s" % hostname
-        if not self._replace_hosts(old, new) or not self._replace_hosts("127.0.0.1 '$HOSTNAME'", local_new):
-            return False
-
-        cmd = 'hostname %s' % hostname
-        return self._execute(cmd)
+        return self._replace_hosts(old, new) and self._replace_hosts("127.0.0.1 '$HOSTNAME'", local_new)
 
     def set_hosts(self, **kwargs):
         logger.info('set hosts')
