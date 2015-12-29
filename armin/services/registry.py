@@ -11,7 +11,7 @@ class Registry(Service):
         cmd = 'mkdir -p %s' % config.REMOTE_REGISTRY_CONFIG_PATH
         if not self.executor(cmd) or not self.make_config() or not self.upload_service():
             return False
-        cmd = 'cd {bindir} && chmod +x {registry} && systemctl start {hub}'
+        cmd = 'cd {bindir} && adduser -d /data/registry -s /sbin/nologin -u 1000 -U registry && chmod +x {registry} && systemctl start {hub}'
         cmd = cmd.format(
             bindir = config.REMOTE_BIN_DIR,
             registry = config.REGISTRY_BIN,
