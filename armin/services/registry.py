@@ -21,7 +21,7 @@ class Registry(Service):
             cmd += ' && systemctl enable hub'
         return self.executor(cmd)
 
-    def update(self, update=False, *kwargs):
+    def update(self, update=False, **kwargs):
         cmd = 'systemctl stop hub'
         if not self.executor(cmd) or not self.make_config():
             return False
