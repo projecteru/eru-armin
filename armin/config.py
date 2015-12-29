@@ -57,6 +57,11 @@ REMOTE_SERVICE_DIR = '/usr/lib/systemd/system'
 
 REMOTE_ERU_AGENT_CONFIG_PATH = '/etc/eru-agent/'
 REMOTE_FALCON_AGENT_CONFIG_PATH = '/etc/falcon-agent/'
+REMOTE_REGISTRY_CONFIG_PATH = '/etc/registry/'
+
+REGISTRY_CONFIG_FILE = 'registry.yaml'
+REGISTRY_BIN = 'registry'
+REGISTRY_SERVICE = 'hub.service'
 
 SERVICE_CLS_MAP = {
     'moosefs-client': {
@@ -73,6 +78,9 @@ SERVICE_CLS_MAP = {
     },
     'calico': {
         'mod': 'calico.Calico', 'unit': 'calico',
+    },
+    'registry': {
+        'mod': 'registry.Registry', 'unit': 'hub',
     },
 }
 
