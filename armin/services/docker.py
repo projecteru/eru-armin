@@ -10,7 +10,7 @@ class Docker(Service):
         self.params.update(kwargs)
         if not self.make_service():
             return False
-        cmd = 'yum install -y device-mapper-libs && cd {workdir} && python {setup} && rm -rf {setup} {certs}'
+        cmd = 'cd {workdir} && python {setup} && rm -rf {setup} {certs}'
         cmd = cmd.format(
             workdir = config.REMOTE_DOCKER_WORKDIR,
             setup = config.DOCKER_SETUP,
