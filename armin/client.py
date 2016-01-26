@@ -7,6 +7,24 @@ from armin.host import Host
 
 logger = logging.getLogger(__name__)
 
+
+def ssh_client(server, user, password, keyfile):
+    client = paramiko.SSHClient()
+    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    try:
+        client.connect(
+            server,
+            username = user,
+            password = password,
+            key_filename = keyfile,
+            look_for_keys = False,
+        )
+    except Exception, e:
+        logger.exception(e)
+    else:
+        return Host(server, client)
+
+
 def generate_ssh_clients(config):
     servers = config.get('servers')
     auth = config.get('auth')
@@ -14,44 +32,15 @@ def generate_ssh_clients(config):
         return None
     clients = {}
     for server in servers:
-        client = paramiko.SSHClient()
-        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        try:
-            client.connect(
-                server,
-                username = auth.get('user'),
-                password = auth.get('password'),
-                key_filename = auth.get('keyfile'),
-                look_for_keys = False,
-            )
-        except Exception, e:
-            logger.exception(e)
-        else:
-            clients[server] = Host(server, client)
+        clients[server] = ssh_client(server, auth.get('user'), auth.get('password'), auth.get('keyfile'))
     return clients
 
 
 def generate_ssh_client(server, auth):
     if not server or not auth:
         return None
-
-    client = paramiko.SSHClient()
-    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    try:
-        client.connect(
-            server,
-            username = auth.get('user'),
-            password = auth.get('password'),
-            key_filename = auth.get('keyfile'),
-            look_for_keys = False,
-        )
-    except Exception, e:
-        logger.exception(e)
-    else:
-        host = Host(server, client)
-    return host
+    return ssh_client(server, auth.get('user'), auth.get('password'), auth.get('keyfile'))
 
 
 def resolve_servers(config):
-    servers = config.get('servers')
-    return servers
+    return config.get('servers')
