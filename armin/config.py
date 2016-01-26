@@ -3,7 +3,7 @@
 
 import os
 
-BASE_PATH = os.path.dirname(os.path.dirname(__file__))
+BASE_PATH = os.getcwd()
 
 INTERFACE_CONFIG = '/etc/sysconfig/network-scripts/ifcfg-%s'
 GATEWAY_CONFIG = 'GATEWAY=%s'
