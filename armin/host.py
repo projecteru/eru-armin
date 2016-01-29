@@ -9,13 +9,12 @@ from armin.user import User, Root
 from armin.services import get_service
 from armin.utils import get_random_passwd
 
-logger = logging.getLogger(__name__)
-
 class Host(object):
 
-    def __init__(self, server, client):
+    def __init__(self, server, client, logger):
         self.client = client
         self.server = server
+        self.logger = logger
 
     def _add_sudo(self, username):
         cmd = '''gpasswd -a %s wheel''' % username
@@ -43,10 +42,10 @@ class Host(object):
                 data = False
                 rl, wl, xl = select.select([chan], [], [], 1)
                 if chan in rl and chan.recv_stderr_ready():
-                    print chan.recv_stderr(1024),
+                    self.logger.info(chan.recv_stderr(1024))
                     data = True
                 elif chan in rl and chan.recv_ready():
-                    print chan.recv(1024),
+                    self.logger.info(chan.recv(1024))
                     data = True
                 if not data \
                     and (chan.exit_status_ready() or chan.closed) \
@@ -55,11 +54,11 @@ class Host(object):
                     chan.shutdown(2)
                     break
         except Exception, e:
-            logger.exception(e)
+            self.logger.exception(e)
             return False
 
         exit_status = chan.recv_exit_status()
-        print cmd, exit_status
+        self.logger.info('%s %s', cmd, exit_status)
         return exit_status == config.EXECUTE_OK
 
     def _upload(self, src, dst):
@@ -67,10 +66,10 @@ class Host(object):
         try:
             sftp.put(src, dst)
         except Exception, e:
-            logger.exception(e)
+            self.logger.exception(e)
             return False
         else:
-            logger.info('upload %s to %s success', src, dst)
+            self.logger.info('upload %s to %s success', src, dst)
         finally:
             sftp.close()
         return True
@@ -86,7 +85,7 @@ class Host(object):
         ])
 
     def set_hostname(self, hostname):
-        logger.info('set hostname')
+        self.logger.info('set hostname')
         old = "%s '$HOSTNAME'" % self.server
         new = "%s %s" % (self.server, hostname)
         local_new = "127.0.0.1 %s" % hostname
@@ -98,27 +97,27 @@ class Host(object):
         return self._execute(cmd)
 
     def set_hosts(self, **kwargs):
-        logger.info('set hosts')
+        self.logger.info('set hosts')
         result = dict([
             (server, self._replace_hosts(server, '%s %s' % (server, name))) for server, name in kwargs.iteritems()
         ])
         return result
 
     def rm_hosts(self, *args):
-        logger.info('delete host')
+        self.logger.info('delete host')
         s = ';'.join(['/%s$/d' % name for name in args])
         cmd = '''sed -i '%s' %s''' % (s, config.HOSTS_CONF)
         return self._execute(cmd)
 
     def update_system(self, quite=False):
-        logger.info('update system')
+        self.logger.info('update system')
         cmd = 'yum update -y'
         if quite:
             cmd = 'yum update -y -q'
         return self._execute(cmd)
 
     def set_gateway(self, interface, gateway):
-        logger.info('set gateway')
+        self.logger.info('set gateway')
         config_file = config.INTERFACE_CONFIG % interface
         # clean ifcfg resolver and getway config
         # set new gateway
@@ -127,7 +126,7 @@ class Host(object):
         return self._execute(cmd)
 
     def set_dns(self, dns, domain=None):
-        logger.info('set dns')
+        self.logger.info('set dns')
         s = ['nameserver %s' % ip for ip in dns]
         if domain:
             s.append('domain %s' % domain)
