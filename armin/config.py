@@ -41,6 +41,8 @@ LOCAL_SERVICES_DIR = os.path.join(BASE_PATH, 'services')
 
 FALCON_AGENT_CONF = 'cfg.json'
 MOOSEFS_CLIENT_SERVICE = 'mfsmount.service'
+COLLECTD_DIR = 'collectd'
+COLLECTD_REMOTE_DIR = '/etc/collectd.d/'
 
 DOCKER_SETUP = 'docker.py'
 DOCKER_GENERATOR = 'certs'

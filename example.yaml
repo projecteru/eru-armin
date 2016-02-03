@@ -71,13 +71,16 @@ test:
             mount: /mnt/mfs
             mfsmaster: mfsmaster.ricebook.net
             port: 9421
-        falcon-agent:
+        collectd:
           enable: True
           config:
-            heartbeat:
-              addr: hbs.nova.ricebook.net:6030
-            transfer:
-              addr: transfer.nova.ricebook.net:8433
+            df:
+              - /data
+            graphite:
+              host: graphite.ricebook.net
+              port: "3003"
+            processes:
+              mfsmount: /usr/bin/mfsmount
         docker:
           enable: True
           config:
@@ -118,10 +121,6 @@ test:
             mount: /mnt/mfs
             mfsmaster: mfsmaster
             port: 9421
-        falcon-agent:
-          update: True
-          config:
-            debug: false
         eru-agent:
           config:
             lenz:
@@ -134,5 +133,5 @@ test:
             log: /data/calico
       restart:
         - moosefs-client
-        - falcon-agent
+        - collectd
         - eru-agent
