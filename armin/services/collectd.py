@@ -38,8 +38,6 @@ class Collectd(Service):
         return True
 
     def make_service(self):
-        import pdb
-        pdb.set_trace()
         confs_dir = os.path.join(config.LOCAL_SERVICES_DIR, config.COLLECTD_DIR)
         for plugin, params in self.params.iteritems():
             f_name = '%s.conf' % plugin
