@@ -240,7 +240,6 @@ class Host(object):
                 r[service] = False
                 enable = params.get('enable', False)
                 conf = params.get('config', {})
-                import pdb;pdb.set_trace()
                 svr = get_service(service, conf, self._upload, self._execute)
                 if not svr:
                     continue
