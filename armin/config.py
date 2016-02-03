@@ -84,6 +84,9 @@ SERVICE_CLS_MAP = {
     'registry': {
         'mod': 'registry.Registry', 'unit': 'hub',
     },
+    'collectd': {
+        'mod': 'collectd.Collectd', 'unit': 'collectd',
+    },
 }
 
 try:
