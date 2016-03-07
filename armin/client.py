@@ -5,9 +5,6 @@ import logging
 import paramiko
 from armin.host import Host
 
-logger = logging.getLogger(__name__)
-
-
 def ssh_client(server, user, password, keyfile, logger):
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -39,7 +36,7 @@ def generate_ssh_clients(config, logger):
 def generate_ssh_client(server, auth, logger):
     if not server or not auth:
         return None
-    return ssh_client(server, auth.get('user'), auth.get('password'), auth.get('keyfile'), logger)
+    return ssh_client(server, auth['user'], auth['password'], auth['keyfile'], logger)
 
 
 def resolve_servers(config):
