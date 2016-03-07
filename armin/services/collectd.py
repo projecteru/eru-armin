@@ -6,7 +6,6 @@
 #sed -i 's/#LoadPlugin disk/LoadPlugin disk/g'
 
 import os
-import json
 import jinja2
 from armin import config
 from armin.services import Service
